@@ -1,6 +1,7 @@
 grml-x (0.3-13) unstable; urgency=low
 
   * Update /etc/X11/xorg.conf.vmware: use vmmouse.
+  * grml-x: use /bin/zsh as intepreter
 
  -- Michael Prokop <mika@grml.org>  Thu, 26 Oct 2006 00:41:45 +0200
 
@@ -21,7 +22,7 @@ grml-x (0.3-11) unstable; urgency=low
 grml-x (0.3-10) unstable; urgency=low
 
   * Updated hsync/vsync documentation (thanks for hint, Martin
-    Würtele!) and improved usage information.
+    Wuertele!) and improved usage information.
 
  -- Michael Prokop <mika@grml.org>  Thu, 27 Jul 2006 21:57:23 +0200
 
