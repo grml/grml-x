@@ -1,3 +1,9 @@
+grml-x (0.3-13) unstable; urgency=low
+
+  * Update /etc/X11/xorg.conf.vmware: use vmmouse.
+
+ -- Michael Prokop <mika@grml.org>  Thu, 26 Oct 2006 00:41:45 +0200
+
 grml-x (0.3-12) unstable; urgency=low
 
   * Add gnome-session (but leave gnomesession as fallback option)
