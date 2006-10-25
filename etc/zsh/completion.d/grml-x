@@ -1,0 +1,45 @@
+# Filename:      /etc/zsh/completion.d/grml-x
+# Purpose:       completion for command grml-x for zsh (z shell)
+# Authors:       grml-team (grml.org), (c) Michael Prokop <mika@grml.org>
+# Bug-Reports:   see http://grml.org/bugs/
+# License:       This file is licensed under the GPL v2.
+# Latest change: Sam Aug 12 10:26:16 CEST 2006 [mika]
+################################################################################
+
+#  compdef _grml-x grml-x
+
+  for wm in blackbox dwm evilwm fluxbox fvwm fvwm2 fvwm-crystal gnome-session  \
+            gnomesession icewm ion2 ion3 jwm pekwm pwm3 ratpoison startkde twm \
+            w9wm windowlab wmi wmii wm-ng xfce4 xfwm4 ; do
+    [ -x /usr/bin/$wm ] && LIST="$LIST $wm"
+  done
+
+  _grml-x() { local arguments wm
+   wm=(`echo $LIST`)
+   arguments=(
+   '-display:display for xserver:(7 8)'
+   '-force[force creation of xconfig file]'
+   '-help:[display help]'
+   '-genmouse[generate generic entry for mouse using /dev/input/mice and auto protocol]'
+   '-hsync:horizontal sync frequencies (<number>):(28 `seq 30 5 95` 96)'
+   '-mode:resolution-mode for xserver (<width>x<height> - e.g. 1024x768)]:(1920x1440 1600x1200 1400x1050 1280x1024 1280x960 1024x768 800x600 640x480)'
+   '-module:module for xserver :(`cd /usr/lib/xorg/modules/drivers/ && /bin/ls *.so | sed -e 's/_drv.so//' -e 's/.so//'`)'
+   '-nodpms[disable Display Power Management Signaling]'
+   '-noddc[use static resolution modes for monitors without support for ddc probing]'
+   '-nohsync[do not activate HorizSync-entry]'
+   '-nops2[deactivate entry for PS/2 mouse]'
+   '-nostart[do not start X server]'
+   '-nosynaptics[use a synaptics touchpad without synaptics driver/functions]'
+   '-nosync[do not use static horizontal and vertical sync frequencies but let it choose the X-server]'
+   '-nousb[deactivate default entry for usb mouse (/dev/input/mice)]'
+   '-novref[do not activate VertRefresh-entry]'
+   '-vsync:vertical sync frequencies (<number>):(43 `seq 45 5 70` 72)'
+   '-xserver:xserver used for creation of xconfig file:(XFree86 X.org)'
+   ':window manager:($wm)'
+   )
+    _arguments -s $arguments
+  }
+  compdef _grml-x grml-x
+
+## END OF FILE #################################################################
+# vim:foldmethod=marker

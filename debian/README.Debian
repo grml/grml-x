@@ -1,0 +1,10 @@
+grml-x
+------
+
+grml-x creates a configuration file for xserver. The package does
+not depend on xbase-clients and xserver-xorg because it should be
+possible to install and use grml-x without a (working) xserver.
+If you want to use a full functional grml-x you have to install
+the packages of course.
+
+ -- Michael Prokop <mika@grml.org>, Die Jul 19 15:06:00 CEST 2005

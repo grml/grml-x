@@ -1,0 +1,16 @@
+Source: grml-x
+Section: grml
+Priority: optional
+Maintainer: Michael Prokop <mika@grml.org>
+Build-Depends: debhelper (>= 4.0.0)
+Standards-Version: 3.6.2
+
+Package: grml-x
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, xserver-xorg | xserver, hwinfo, grml-etc (>= 0.5-20), zsh, pciutils, sudo, xbase-clients
+Recommends: fluxbox | x-window-manager, xterm | x-terminal-emulator, xfonts-base
+Suggests: xfonts-100dpi, xfonts-75dpi, fonts-ttf-west-european, xfonts-base-transcoded
+Conflicts: grml-scripts (<= 0.4-4)
+Description: wrapper for startx for running X Window System
+ grml-x generates a configuration for X server, supporting
+ several options and using a hardware recognition system.

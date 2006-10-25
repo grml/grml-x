@@ -1,0 +1,109 @@
+.TH GRML-X 1
+.SH NAME
+grml-x \- create xconfig file and start X window system on grml-system
+.SH SYNOPSIS
+.B grml-x
+.RI "[ OPTIONS ]" " windowmanager_you_want_to_use"
+.SH DESCRIPTION
+grml-x creates the configuration file for X server (X.org or XFree86)
+and starts up X server with specified window manager.
+.SH IMPLEMENTATION
+grml-x uses hwinfo for getting hardware related information.
+It creates the X config file /etc/X11/xorg.conf for X.org or /etc/X11/XF86Config-4 for
+XFree86 (needs root permissions therefore). If a X config file is present
+already, grml-x won't touch the file unless the '-force' option or another option
+which modifies content of the X config file is specified, the old config file gets backed up
+via adding the extension .old.
+Afterwards the 'exec' command in ~/.xinitrc gets adjusted to start the provided window manager
+and then startx is executed. If ~/.xinitrc does not exist a simple default one will be created.
+Notice that you do not have to use grml-x to start X server if you already have a working
+X config file. Adjust ~/.xinitrc to your needs and then run startx to start X server.
+.SH OPTIONS
+.TP
+.B XOPTS='...'
+Provide options for startx, see 'man 1 startx'.
+.TP
+.B \-display <number>
+Specifiy display for use with Xserver.
+.TP
+.B \-force
+Force creation of xconfig file. This option is also assumed when another
+option which needs to be write values to the X config file is provided. The old
+X config file (/etc/X11/xorg.conf or /etx/X11/XFree86Config-4) is renamed
+via adding the extension .old.
+.TP
+.B \-genmouse
+Generate generic entry for mouse using /dev/input/mice and auto protocol. This option
+is useful in combination with '-nousb -nops2' for example in VMWare.
+.TP
+.B \-help
+Display help.
+.TP
+.B \-hsync <number>
+Specify horizontal sync frequencies. Use a number like "30-65".
+.TP
+.B \-mode <width>x<height>
+Resolution-mode for xserver.
+.TP
+.B \-module <name>
+Module for xserver.
+.TP
+.B \-noddc
+Do not use ddc probing but use static entries for resolution modes.
+.TP
+.B \-nohsnc
+Do not activate HorizSync-entry in xconfig file.
+.TP
+.B \-nops2
+Deactivate entry for PS/2 mouse.
+.TP
+.B \-nostart
+Do not start X server.
+.TP
+.B \-nosynaptics
+Do not activate a present Synaptics touchpad but use it only with 'normal' touchpad
+functions.
+.TP
+.B \-nosync
+Do not activate horizontal and vertical sync frequencies. This option is useful
+on many modern computers using a LCD/TFT display. To avoid problems on very old
+monitors this option is not the default.
+.TP
+.B \-nousb
+Do not set an entry for USB mouse in the xconfig file.
+.TP
+.B \-novref
+Do not activate VertRefresh-entry in xconfig file.
+.TP
+.B \-vsync <number>
+Specify vertical sync frequencies. Use a number like "50-60".
+.TP
+.B \-xserver [XFree86|Xorg]
+Specify Xserver which should be used for creation of xconfig file.
+For XFree86 the file /etc/X11/XF86Config-4 is written, for Xorg the
+file /etc/X11/xorg.conf.
+.SH EXAMPLES
+.TP 
+.B grml-x -mode '1280x1024 1024x768' wmi
+Use resolutions 1280x1024 and 1024x768 and start windowmanager wmi.
+.TP
+.B grml-x -module vesa ion3
+Use vesa-module and start windowmanager ion3.
+.TP
+.B grml-x -hsync "30-65" fluxbox
+Use 30-65kHz for horizontal sync frequency and start windowmanager fluxbox.
+.TP 
+.B grml-x -display 8 ratpoison
+Use display 8 for Xserver and start windowmanager ratpoison.
+.TP 
+.B grml-x -nostart -f fluxbox
+Force writing of config file but do not start X server. Please do not forget to add a window manager as last option because
+grml-x changes the according exec-statement in $HOME/.xinitrc.
+.TP
+.B XOPTS='-depth 16' grml-x fluxbox
+Set color depth to 16 bit and start windowmanager fluxbox.
+.SH BUGS
+.TP
+Please report any problems to the grml-team! http://grml.org/bugs/
+.SH AUTHOR
+This manual page was written by the grml-team. http://grml.org/ (c)Michael Prokop <mika@grml.org>
