@@ -1,3 +1,12 @@
+grml-x (0.3-14) unstable; urgency=low
+
+  * Use "Architecture: all" in debian/control to support architectures
+    not running on x86 as well.
+  * Bumb Standard Version to 3.7.2 (no further changes).
+  * Remove configure stuff in debian/rules.
+
+ -- Michael Prokop <mika@grml.org>  Sat, 11 Nov 2006 21:21:23 +0100
+
 grml-x (0.3-13) unstable; urgency=low
 
   * Update /etc/X11/xorg.conf.vmware: use vmmouse.
