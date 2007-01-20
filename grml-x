@@ -4,7 +4,7 @@
 # Authors:       grml-team (grml.org), (c) Michael Prokop <mika@grml.org>
 # Bug-Reports:   see http://grml.org/bugs/
 # License:       This file is licensed under the GPL v2.
-# Latest change: Sam Aug 05 08:38:49 CEST 2006 [mika]
+# Latest change: Sam Jän 20 10:42:37 CET 2007 [mika]
 ################################################################################
 
 # some zsh-stuff {{{
@@ -410,17 +410,17 @@ parse_options()
       KEYBOARD="Driver      \"keyboard\"
         Option      \"XkbRules\" \"xfree86\"
         Option      \"XkbModel\" \"pc105\"
-        Option      \"XkbLayout\" \"${XKEYBOARD}\"
-        #Option      \"XkbVariant\" \"nodeadkeys\""
+        Option      \"XkbLayout\" \"${XKEYBOARD},us\"
+        # Option      \"XkbVariant\" \"nodeadkeys\""
    elif [[ -n $(X -version 2>&1 | grep -e 'X\.Org' -e 'Version 7\.') || "$XSERVER" == Xorg ]] ; then
       XSERVER="Xorg"
       XCONFIG='/etc/X11/xorg.conf'
       KEYBOARD="Driver      \"kbd\"
-        #Option      \"XkbRules\"   \"xfree86\"
+        # Option      \"XkbRules\"   \"xfree86\"
         Option      \"XkbRules\"   \"xorg\"
         Option      \"XkbModel\"   \"pc105\"
-        Option      \"XkbLayout\"  \"${XKEYBOARD}\"
-        #Option      \"XkbVariant\" \"nodeadkeys\""
+        Option      \"XkbLayout\"  \"${XKEYBOARD},us\"
+        # Option      \"XkbVariant\" \"nodeadkeys\""
    fi
 
    # check for font path
@@ -621,6 +621,7 @@ Section "InputDevice"
         Identifier  "Keyboard0"
         Option      "CoreKeyboard"
         $KEYBOARD
+	# Option      "XkbOptions" "ctrl:swapcaps,grp:alt_shift_toggle,grp_led:scroll,compose:menu"
 EndSection
 
 # More information: http://ftp.x.org/pub/X11R7.0/doc/html/mouse.html
