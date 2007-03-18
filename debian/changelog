@@ -1,3 +1,9 @@
+grml-x (0.3.17) unstable; urgency=low
+
+  * Added xcursor-themes to recommends.
+
+ -- Michael Prokop <mika@grml.org>  Sun, 18 Mar 2007 15:39:34 +0100
+
 grml-x (0.3.16) unstable; urgency=low
 
   * Add xserver-xorg-input-vmmouse to recommends.
