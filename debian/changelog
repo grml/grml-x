@@ -1,6 +1,7 @@
-grml-x (0.3-16) unstable; urgency=low
+grml-x (0.3.16) unstable; urgency=low
 
   * Add xserver-xorg-input-vmmouse to recommends.
+  * Change version schema from x.y-z to x.y.z.
 
  -- Michael Prokop <mika@grml.org>  Sun, 18 Mar 2007 14:57:35 +0100
 
