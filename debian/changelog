@@ -1,3 +1,9 @@
+grml-x (0.3-16) unstable; urgency=low
+
+  * Add xserver-xorg-input-vmmouse to recommends.
+
+ -- Michael Prokop <mika@grml.org>  Sun, 18 Mar 2007 14:57:35 +0100
+
 grml-x (0.3-15) unstable; urgency=low
 
   * Add 'us' to XkbLayout no matter which language is detected.
