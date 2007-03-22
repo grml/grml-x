@@ -473,7 +473,14 @@ parse_options()
 
    MODE=$o_mode[2]
    if [ -z $MODE ] ; then
-     mode # get available modes
+     B_MODE="$(getBootParam xmode 2>/dev/null)"
+     if [ -n "$B_MODE" ] ; then
+       MODES="Modes \"$B_MODE\""
+       FORCE="yes"
+     fi
+     if [ -z "$MODES" ] ; then
+       mode # get available modes
+     fi
    else
      MODES="Modes \"$MODE\""
      FORCE="yes"
