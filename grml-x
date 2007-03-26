@@ -4,7 +4,7 @@
 # Authors:       grml-team (grml.org), (c) Michael Prokop <mika@grml.org>
 # Bug-Reports:   see http://grml.org/bugs/
 # License:       This file is licensed under the GPL v2.
-# Latest change: Mon Mär 26 22:11:44 CEST 2007 [mika]
+# Latest change: Mon Mär 26 22:19:37 CEST 2007 [mika]
 ################################################################################
 
 # debugging {{{
@@ -21,11 +21,12 @@
      [ -r /etc/grml_colors ] && . /etc/grml_colors
   fi
 
-  # some functions like getbootparam
-  if [ -r /etc/grml/script-functions ] ; then
+  # some functions like getBootParam
+  if [ -r /etc/grml/script-functions -a -r /etc/grml/sh-lib ] ; then
      source /etc/grml/script-functions
+     source /etc/grml/sh-lib
   else
-    echo 'Error: sourcing /etc/grml/script-functions failed. Exiting.'
+    echo 'Error: sourcing function files failed. Exiting.'
     exit 1
   fi
 
@@ -490,7 +491,7 @@ parse_options()
      # module handling
      MODULE=$o_module[2]
      if [ -z "$MODULE" ] ; then
-       MODULE="$(getbootparam xmodule 2>/dev/null)"
+       MODULE="$(getBootParam xmodule 2>/dev/null)"
        if [ -z "$MODULE" ] ; then
          MODULE=$(grep 'XFree86 v4 Server Module:' "${HWINFO_TMP}" | head -1 | awk '{print $5}')
          if [ -z "$MODULE" ] ; then
@@ -510,7 +511,7 @@ parse_options()
 
      MODE=$o_mode[2]
      if [ -z $MODE ] ; then
-       B_MODE="$(getbootparam xmode 2>/dev/null)"
+       B_MODE="$(getBootParam xmode 2>/dev/null)"
        if [ -n "$B_MODE" ] ; then
          MODES="Modes \"$B_MODE\""
          FORCE="yes"
