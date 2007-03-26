@@ -383,7 +383,7 @@ parse_options()
    fi
 
    if [[ "$o_fallback" != "" ]]; then
-      SKIPHWINFO="yes"
+      FALLBACK="yes"
       if [ -r /etc/X11/xorg.conf.example ] ; then
          sudo cp /etc/X11/xorg.conf.example $XCONFIG
          print "$bold_color$fg[blue]Copying /etc/X11/xorg.conf.example to $XCONFIG as requested via fallback option."
@@ -442,7 +442,7 @@ parse_options()
       Option      \"XkbVariant\" \"nodeadkeys\""
    fi
 
-   if [ -n "$FORCE" -o ! -r "$XCONFIG" -o -n "$SKIPHWINFO" ] ; then
+   if [ -n "$FORCE" -o ! -r "$XCONFIG" -a -z "$FALLBACK" ] ; then
      print -n "$bold_color$fg[blue]Gathering hardware information...$fg[red]"
 
      sync # get hsync/vsync
@@ -758,7 +758,7 @@ function writeconfig
     print -n "$bold_color$fg[blue]Creating $XCONFIG: $fg[red]"
     writeit && print "$fg[green]done$reset_color"
   else
-    if [ -z "$FORCE" ] ; then
+    if [ -z "$FORCE" -a -z "$FALLBACK" ] ; then
        print "$bold_color$fg[blue]Notice: $XCONFIG exists already.
 Use the force-option (-force) to force creation.
 $fg[red]"
