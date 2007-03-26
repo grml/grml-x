@@ -4,39 +4,110 @@
 # Authors:       grml-team (grml.org), (c) Michael Prokop <mika@grml.org>
 # Bug-Reports:   see http://grml.org/bugs/
 # License:       This file is licensed under the GPL v2.
-# Latest change: Sam Jän 20 10:42:37 CET 2007 [mika]
+# Latest change: Mon Mär 26 21:26:31 CEST 2007 [mika]
 ################################################################################
 
-# some zsh-stuff {{{
+# debugging {{{
+# usage: DEBUG=1 grml-x ..... 2>/tmp/grml-x-debug.log
   if [[ $DEBUG -gt 0 ]]; then
       setopt xtrace
   fi
-  autoload colors ; colors
-  [ -r /etc/grml_colors ] && . /etc/grml_colors
-  [ -r /etc/grml/sh-lib ] && . /etc/grml/sh-lib
-  if [ -r /etc/sysconfig/keyboard ] ; then
-    source /etc/sysconfig/keyboard
-  else
-    XKEYBOARD='us'
-  fi
 # }}}
 
-# warn if running as user root {{{
-  if [[ $UID == 0 ]] ; then
-     print "$bg[black]$fg[red]${bold_color}Warning: Please do not run grml-x as user root.${reset_color}"
-     print "$bg[black]$fg[red]${bold_color}Running grml-x as user root is *not* supported!${reset_color}"
-     print "$bg[black]$fg[red]${bold_color}Switch to user grml or run su - grml -c 'grml-x ...' instead.${reset_color}"
-     # exit -1
+# functions and color {{{
+  # use colors only if not booted with nocolor bootoption
+  if ! grep -q nocolor /proc/cmdline ; then
+     autoload colors ; colors
+     [ -r /etc/grml_colors ] && . /etc/grml_colors
   fi
-  fstabuser=$(grep ':x:1000:' /etc/passwd)
-  export fstabuser=${fstabuser%%[:]*}
+
+  # some functions like getbootparam
+  if [ -r /etc/grml/script-functions ] ; then
+     source /etc/grml/script-functions
+  else
+    echo 'Error: sourcing /etc/grml/script-functions failed. Exiting.'
+    exit 1
+  fi
+
+  check4root && ROOT='1' || ROOT=''
 # }}}
 
 # set variables  {{{
   PROGRAMNAME=${0##*/}
   HWINFO='/usr/sbin/hwinfo'
   DATE=$(date)
-  (( ${+XINITRC} )) || XINITRC="$HOME/.xinitrc"
+  [ -n "$XINITRC" ] || XINITRC="$HOME/.xinitrc"
+
+  # temporary files
+  HWINFO_TMP="/tmp/hwinfo.$$"
+  MONITORINFO="/tmp/monitorinfo.$$"
+  MOUSEINFO="/tmp/mouse.$$"
+
+  if [ -r /etc/sysconfig/keyboard ] ; then
+    source /etc/sysconfig/keyboard
+  else
+    XKEYBOARD='us'
+  fi
+
+  XSERVER="Xorg"
+  XCONFIG='/etc/X11/xorg.conf'
+  KEYBOARD="Driver      \"kbd\"
+        # Option      \"XkbRules\"   \"xfree86\"
+        Option      \"XkbRules\"   \"xorg\"
+        Option      \"XkbModel\"   \"pc105\"
+        Option      \"XkbLayout\"  \"${XKEYBOARD},us\"
+        # Option      \"XkbVariant\" \"nodeadkeys\""
+
+  # check for font path
+  if [ -d /usr/share/fonts/X11 ] ; then
+     XFONTS="        FontPath     \"/usr/share/fonts/X11/misc\"
+        FontPath     \"/usr/share/fonts/X11/100dpi/:unscaled\"
+        FontPath     \"/usr/share/fonts/X11/75dpi/:unscaled\"
+        FontPath     \"/usr/share/fonts/X11/Type1\"
+        FontPath     \"/usr/share/fonts/X11/100dpi\"
+        FontPath     \"/usr/share/fonts/X11/75dpi\""
+  fi
+  # /usr/X11R6/lib/X11/fonts exists nearly everywhere, assume
+  # /usr/X11R6/lib/X11/fonts as valid font path only if fonts.dir
+  # exists for "misc"
+  if [ -r /usr/X11R6/lib/X11/fonts/misc/fonts.dir ] ; then
+      XFONTS="$XFONTS
+        FontPath     \"/usr/X11R6/lib/X11/fonts/Type1\"
+        FontPath     \"/usr/X11R6/lib/X11/fonts/misc:unscaled\"
+        FontPath     \"/usr/X11R6/lib/X11/fonts/misc\"
+        FontPath     \"/usr/X11R6/lib/X11/fonts/75dpi:unscaled\"
+        FontPath     \"/usr/X11R6/lib/X11/fonts/75dpi\"
+        FontPath     \"/usr/X11R6/lib/X11/fonts/100dpi:unscaled\"
+        FontPath     \"/usr/X11R6/lib/X11/fonts/100dpi\""
+  fi
+# }}}
+
+# make sure we don't leave any temp files {{{
+bailout() {
+  rm -f "$HWINFO_TMP" "$MONITORINFO" "$MOUSEINFO"
+  [ -n "$1" ] && EXIT="$1" || EXIT="1"
+  print "$bg[black]$fg[red]${bold_color}Exiting...${reset_color}">&2
+  exit "$EXIT"
+}
+
+trap bailout 1 2 3 15
+# }}}
+
+# warn if running as user root {{{
+  if [ -n "$ROOT" ] ; then
+     if [ -r /etc/grml_cd ] ; then
+        print "$bg[black]$fg[red]${bold_color}Warning: Please do not run grml-x as user root.${reset_color}"
+        print "$bg[black]$fg[red]${bold_color}Running grml-x as user root is *not* supported!${reset_color}"
+        print "$bg[black]$fg[red]${bold_color}Switch to user grml or run su - grml -c 'grml-x ...' instead.${reset_color}"
+        print ''
+     else
+        print "$bg[black]$fg[red]${bold_color}Warning: Please do not run X.org as user root!${reset_color}"
+        print "$bg[black]$fg[red]${bold_color}As soon as you have a working $XCONFIG please use startx instead of grml-x.${reset_color}"
+        print ''
+     fi
+  fi
+  fstabuser=$(grep ':x:1000:' /etc/passwd)
+  fstabuser=${fstabuser%%[:]*}
 # }}}
 
 # usage information {{{
@@ -66,7 +137,6 @@ More information on grml-x can be found in the manual page: man grml-x
 Report bugs, send wishes and feedback to the grml team:
 http://grml.org/bugs/ - contact (at) grml.org
 "
-#  $PROGRAMNAME wmi -- :8
   print "${reset_color}"
   exit 2
 }
@@ -75,8 +145,7 @@ http://grml.org/bugs/ - contact (at) grml.org
 # writehwinfo {{{
 writehwinfo()
 {
-   HWINFO_TMP="/tmp/hwinfo.$$"
-   if [[ $UID == 0 ]] ; then
+   if [ -n "$ROOT" ] ; then
      su - $fstabuser -c "$HWINFO > $HWINFO_TMP"
    else
      $HWINFO > $HWINFO_TMP
@@ -87,7 +156,6 @@ writehwinfo()
 # monitor {{{
 monitor()
 {
-  MONITORINFO="/tmp/monitorinfo.$$"
   sudo $HWINFO --monitor > $MONITORINFO
 }
 # }}}
@@ -95,6 +163,7 @@ monitor()
 # mode {{{
 mode()
 {
+   [ -r "$MONITORINFO" ] || monitor # get monitor settings
    modes=$(perl -e 'while (<STDIN>) {if (/  Resolution:/) { s/.*\s+(\d+x\d+).*/$1/; print} }' < $MONITORINFO |
 sort -nur | perl -ne 's/\s+/ /; s/(\d+x\d+)/"$1"/; print')
    if [[ -n $NODDC ]] ; then
@@ -110,7 +179,7 @@ sort -nur | perl -ne 's/\s+/ /; s/(\d+x\d+)/"$1"/; print')
 # sync - get hsync/vsync settings {{{
 sync()
 {
-   monitor # get monitor settings
+   [ -r "$MONITORINFO" ] || monitor # get monitor settings
    vsyncval=$(awk '/Vert. Sync Range:/{print $4}' $MONITORINFO | sed 's/-/.0 - / ; s/$/.0/' | head -1)
    hsyncval=$(awk '/Hor. Sync Range:/{print $4}'  $MONITORINFO | sed 's/-/.0 - / ; s/$/.0/' | head -1)
    if [ -z $vsyncval ] ; then
@@ -120,24 +189,17 @@ sync()
      hsyncval='28.0 - 96.0'
    fi
 }
-sync
 # }}}
 
 # mouse {{{
 mouse()
 {
-   MOUSEINFO="/tmp/mouse.$$"
-#   if [[ $UID == 0 ]] ; then
-#     su - $fstabuser -c "$HWINFO --mouse > $MOUSEINFO"
-#   else
-     sudo $HWINFO --mouse > $MOUSEINFO
-#   fi
+   sudo $HWINFO --mouse > $MOUSEINFO
 
    # SynPS/2 Synaptics TouchPad
    if grep -q 'Device:.*Synaptics' "$MOUSEINFO" ; then
     if [[ "$SYNAPTICS" == "yes" ]] ; then # check for '-nosynaptics'-option
      MOUSEDRIVER='synaptics'
-     # SYNMOUSE='InputDevice    "Synaptics" "CorePointer"'
      SYNMOUSE='InputDevice    "Synaptics"  "AlwaysCore"'
      SYNMOUSEDETAIL="
 Section \"InputDevice\"
@@ -216,7 +278,6 @@ EndSection
    fi
 
    # USB-PS/2 Optical Mouse
-#   if grep -q 'Device:.*USB' "$MOUSEINFO" ; then
    if ! [[ -n $NOUSB ]] ; then
      USB='yes'
      USBMOUSE='InputDevice    "USB Mouse"  "CorePointer"'
@@ -307,22 +368,29 @@ EndSection
 # commandline parsing {{{
 parse_options()
 {
-   # default values
-   #o_xserver=(-xserver XFree86)
-   #o_hsync=(-hsync '28.0 - 96.0')
-   #o_vsync=(-vsync '50.0 - 60.0')
-
-   zparseopts -K -- xserver:=o_xserver module:=o_module help=o_help noddc=o_noddc nosync=o_nosync \
+   zparseopts -K -- module:=o_module help=o_help noddc=o_noddc nosync=o_nosync \
                     vsync:=o_vsync hsync:=o_hsync mode:=o_mode force=o_force display:=o_display   \
                     nostart=o_nostart nodpms=o_nodpms nosynaptics=o_nosynaptics nousb=o_nousb \
-                    nops2=o_nops2 genmouse=o_genmouse novref=o_novref nohsync=o_nohsync
+                    nops2=o_nops2 genmouse=o_genmouse novref=o_novref nohsync=o_nohsync \
+                    fallback=o_fallback
 
    if [[ $# == 0 || "$o_help" != "" || "$1" == '-h' || "$1" == '--help' ]]; then
       usage
    fi
 
    if [[ "$o_force" != "" ]]; then
-      FORCE="yes"
+      FORCE='yes'
+   fi
+
+   if [[ "$o_fallback" != "" ]]; then
+      SKIPHWINFO="yes"
+      if [ -r /etc/X11/xorg.conf.example ] ; then
+         sudo cp /etc/X11/xorg.conf.example $XCONFIG
+         print "$bold_color$fg[blue]Copying /etc/X11/xorg.conf.example to $XCONFIG as requested via fallback option."
+      else
+         echo 'Error: /etc/X11/xorg.conf.example not readable, exiting.'
+         exit 1
+      fi
    fi
 
    if [[ "$o_nodpms" != "" ]]; then
@@ -340,10 +408,6 @@ parse_options()
    fi
 
    if [[ "$o_hsync" != "" ]]; then
-      FORCE="yes"
-   fi
-
-   if [[ "$o_xserver" != "" ]]; then
       FORCE="yes"
    fi
 
@@ -370,138 +434,107 @@ parse_options()
    fi
 
    DISPLAY=$o_display[2]
-   if [ -z $o_hsync ] ; then
-     o_hsync=(-hsync "$hsyncval")
-     HSYNC=$o_hsync[2]
-     HORIZSYNC="        HorizSync    $HSYNC"
-   else
-     o_hsync=(-hsync "$o_hsync[2]")
-     HSYNC=$o_hsync[2]
-     HORIZSYNC="        HorizSync    $HSYNC"
-   fi
-
-   if [ -z $o_vsync ] ; then
-     o_vsync=(-vsync "$vsyncval")
-     VSYNC=$o_vsync[2]
-     VERTISYNC="        VertRefresh  $VSYNC"
-   else
-     o_vsync=(-vsync "$o_vsync[2]")
-     VSYNC=$o_vsync[2]
-     VERTISYNC="        VertRefresh  $VSYNC"
-   fi
-
-   if [[ "$o_nosync" != "" ]]; then
-      HORIZSYNC="#       HorizSync   28.0 - 96.0  # deactivated via -nosync option of grml-x"
-      VERTISYNC="#       VertRefresh 50.0 - 60.0  # deactivated via -nosync option of grml-x"
-   fi
-   if [[ "$o_nohsync" != "" ]]; then
-      HORIZSYNC="#       HorizSync   28.0 - 96.0  # deactivated via -nohsync option of grml-x"
-   fi
-   if [[ "$o_novref" != "" ]]; then
-      VERTISYNC="#       VertRefresh 50.0 - 60.0  # deactivated via -novref option of grml-x"
-   fi
 
    eval WINDOWMANAGER=\${$#}
 
-   XSERVER=$o_xserver[2]
-   if [[ -n $(X -version 2>&1| grep XFree86) || "$XSERVER" == XFree86 ]] ; then
-      XSERVER="XFree86"
-      XCONFIG='/etc/X11/XF86Config-4'
-      KEYBOARD="Driver      \"keyboard\"
-        Option      \"XkbRules\" \"xfree86\"
-        Option      \"XkbModel\" \"pc105\"
-        Option      \"XkbLayout\" \"${XKEYBOARD},us\"
-        # Option      \"XkbVariant\" \"nodeadkeys\""
-   elif [[ -n $(X -version 2>&1 | grep -e 'X\.Org' -e 'Version 7\.') || "$XSERVER" == Xorg ]] ; then
-      XSERVER="Xorg"
-      XCONFIG='/etc/X11/xorg.conf'
-      KEYBOARD="Driver      \"kbd\"
-        # Option      \"XkbRules\"   \"xfree86\"
-        Option      \"XkbRules\"   \"xorg\"
-        Option      \"XkbModel\"   \"pc105\"
-        Option      \"XkbLayout\"  \"${XKEYBOARD},us\"
-        # Option      \"XkbVariant\" \"nodeadkeys\""
-   fi
-
-   # check for font path
-   if [ -d /usr/share/fonts/X11 ] ; then
-      XFONTS="        FontPath     \"/usr/share/fonts/X11/misc\"
-        FontPath     \"/usr/share/fonts/X11/cyrillic\"
-        FontPath     \"/usr/share/fonts/X11/100dpi/:unscaled\"
-        FontPath     \"/usr/share/fonts/X11/75dpi/:unscaled\"
-        FontPath     \"/usr/share/fonts/X11/Type1\"
-        FontPath     \"/usr/share/fonts/X11/100dpi\"
-        FontPath     \"/usr/share/fonts/X11/75dpi\""
-   fi
-   if [ -d /usr/X11R6/lib/X11/fonts ] ; then
-       XFONTS="$XFONTS
-        FontPath     \"/usr/X11R6/lib/X11/fonts/misc:unscaled\"
-        FontPath     \"/usr/X11R6/lib/X11/fonts/misc\"
-        FontPath     \"/usr/X11R6/lib/X11/fonts/75dpi:unscaled\"
-        FontPath     \"/usr/X11R6/lib/X11/fonts/75dpi\"
-        FontPath     \"/usr/X11R6/lib/X11/fonts/100dpi:unscaled\"
-        FontPath     \"/usr/X11R6/lib/X11/fonts/100dpi\""
-   fi
-
    if [[ "$XKEYBOARD" == de ]] ; then
-       KEYBOARD="$KEYBOARD
-       Option      \"XkbVariant\" \"nodeadkeys\""
+      KEYBOARD="$KEYBOARD
+      Option      \"XkbVariant\" \"nodeadkeys\""
    fi
 
-   print -n "$bold_color$fg[blue]Gathering hardware information: $fg[red]"
+   if [ -n "$FORCE" -o ! -r "$XCONFIG" -o -n "$SKIPHWINFO" ] ; then
+     print -n "$bold_color$fg[blue]Gathering hardware information...$fg[red]"
 
-   writehwinfo
-   MONITOR=$(awk '/monitor.1:/{print $3}' $HWINFO_TMP)
-   if [[ $MONITOR != 'ddc' ]] ; then
-     NODDC=yes
-   fi
-   MODULE=$o_module[2]
-   if [ -z $MODULE ] ; then
-     MODULE="$(getBootParam xmodule 2>/dev/null)"
-     if [ -z "$MODULE" ] ; then
-       MODULE=$(grep 'XFree86 v4 Server Module:' "${HWINFO_TMP}" | head -1 | awk '{print $5}')
-       if [ -z  "$MODULE" ] ; then
-         MODULE='vesa'
-       fi
+     sync # get hsync/vsync
+
+     if [ -z "$o_hsync" ] ; then
+       o_hsync=(-hsync "$hsyncval")
+       HSYNC=$o_hsync[2]
+       HORIZSYNC="        HorizSync    $HSYNC"
+     else
+       o_hsync=(-hsync "$o_hsync[2]")
+       HSYNC=$o_hsync[2]
+       HORIZSYNC="        HorizSync    $HSYNC"
      fi
-   else
-     FORCE="yes"
-   fi
 
-   mouse    # get mouse settings
-   VGA=$(lspci | grep VGA | sed 's/.*compatible controller: //' | head -1)
+     if [ -z "$o_vsync" ] ; then
+       o_vsync=(-vsync "$vsyncval")
+       VSYNC=$o_vsync[2]
+       VERTISYNC="        VertRefresh  $VSYNC"
+     else
+       o_vsync=(-vsync "$o_vsync[2]")
+       VSYNC=$o_vsync[2]
+       VERTISYNC="        VertRefresh  $VSYNC"
+     fi
 
-   MODE=$o_mode[2]
-   if [ -z $MODE ] ; then
-     B_MODE="$(getBootParam xmode 2>/dev/null)"
-     if [ -n "$B_MODE" ] ; then
-       MODES="Modes \"$B_MODE\""
+     if [[ "$o_nosync" != "" ]]; then
+        HORIZSYNC="#       HorizSync   28.0 - 96.0  # deactivated via -nosync option of grml-x"
+        VERTISYNC="#       VertRefresh 50.0 - 60.0  # deactivated via -nosync option of grml-x"
+     fi
+
+     if [[ "$o_nohsync" != "" ]]; then
+        HORIZSYNC="#       HorizSync   28.0 - 96.0  # deactivated via -nohsync option of grml-x"
+     fi
+
+     if [[ "$o_novref" != "" ]]; then
+        VERTISYNC="#       VertRefresh 50.0 - 60.0  # deactivated via -novref option of grml-x"
+     fi
+
+     # write hwinfo stuff
+     writehwinfo
+
+     # monitor stuff
+     MONITOR=$(awk '/monitor.1:/{print $3}' $HWINFO_TMP)
+     [[ $MONITOR != 'ddc' ]] && NODDC=yes
+
+     # module handling
+     MODULE=$o_module[2]
+     if [ -z "$MODULE" ] ; then
+       MODULE="$(getbootparam xmodule 2>/dev/null)"
+       if [ -z "$MODULE" ] ; then
+         MODULE=$(grep 'XFree86 v4 Server Module:' "${HWINFO_TMP}" | head -1 | awk '{print $5}')
+         if [ -z "$MODULE" ] ; then
+           MODULE='vesa'
+         fi
+         # hwinfo >=13.28 reports driver 'intel' instead of i810
+         if [[ "$MODULE" == 'intel' ]] ; then
+            [ -r /usr/lib/xorg/modules/drivers/intel_drv.so ] || MODULE='i810'
+         fi
+       fi
+     else
        FORCE="yes"
      fi
-     if [ -z "$MODES" ] ; then
-       mode # get available modes
+
+     mouse    # get mouse settings
+     VGA=$(lspci | grep VGA | sed 's/.*compatible controller: //' | head -1)
+
+     MODE=$o_mode[2]
+     if [ -z $MODE ] ; then
+       B_MODE="$(getbootparam xmode 2>/dev/null)"
+       if [ -n "$B_MODE" ] ; then
+         MODES="Modes \"$B_MODE\""
+         FORCE="yes"
+       fi
+       if [ -z "$MODES" ] ; then
+          mode # get available modes
+       fi
+     else
+       MODES="Modes \"$MODE\""
+       FORCE="yes"
      fi
-   else
-     MODES="Modes \"$MODE\""
-     FORCE="yes"
+
+     print "$fg[green]done$reset_color"
+     print "$bg[black]$fg[white]$bold_color"
+     print "$fg[green]Specified windowmanager is $fg[yellow]$WINDOWMANAGER"
+     print "$fg[green]Video is $fg[yellow]$VGA$fg[green] using $bg[black]$fg[yellow]${XSERVER}$fg[cyan](${MODULE})$fg[green] Server"
+     [[ -z $HSYNC ]] && [[ -z $VSYNC ]] && print "$fg[green]Monitor is $fg[yellow]$MONITOR"
+     [[ -z $HSYNC ]] && [[ -n $VSYNC ]] && print "$fg[green]Monitor is $fg[yellow]$MONITOR$fg[green], VSYNC: $fg[yellow]$VSYNC"
+     [[ -z $VSYNC ]] && [[ -n $HSYNC ]] && print "$fg[green]Monitor is $fg[yellow]$MONITOR$fg[green], HSYNC: $fg[yellow]$HSYNC"
+     [[ -n $VSYNC ]] && [[ -n $HSYNC ]] && print "$fg[green]Monitor is $fg[yellow]$MONITOR$fg[green], HSYNC: $fg[yellow]$HSYNC $fg[green]VSYNC: $fg[yellow]$VSYNC"
+     [[ -n $modes ]] && print "$fg[green]Using default X.org modes."
+     [[ -z $modes ]] && print "$fg[green]Using Mode: $fg[yellow]$MODE"
+     print "${reset_color}"
    fi
-
-   print "$fg[green]done$reset_color"
-
-
-   print "$bg[black]$fg[white]$bold_color"
-   print "$fg[green]Specified windowmanager is $fg[yellow]$WINDOWMANAGER"
-   print "$fg[green]Video is $fg[yellow]$VGA$fg[green] using $bg[black]$fg[yellow]${XSERVER}$fg[cyan](${MODULE})$fg[green] Server"
-   [[ -z $HSYNC ]] && [[ -z $VSYNC ]] && print "$fg[green]Monitor is $fg[yellow]$MONITOR"
-   [[ -z $HSYNC ]] && [[ -n $VSYNC ]] && print "$fg[green]Monitor is $fg[yellow]$MONITOR$fg[green], VSYNC: $fg[yellow]$VSYNC"
-   [[ -z $VSYNC ]] && [[ -n $HSYNC ]] && print "$fg[green]Monitor is $fg[yellow]$MONITOR$fg[green], HSYNC: $fg[yellow]$HSYNC"
-   [[ -n $VSYNC ]] && [[ -n $HSYNC ]] && print "$fg[green]Monitor is $fg[yellow]$MONITOR$fg[green], HSYNC: $fg[yellow]$HSYNC $fg[green]VSYNC: $fg[yellow]$VSYNC"
-   [[ -n $modes ]] && print "$fg[green]Using default X.org modes."
-   [[ -z $modes ]] && print "$fg[green]Using Mode: $fg[yellow]$MODE"
-#   [[ -n $MODE ]] && print "$fg[green]Using Mode: $fg[yellow]$MODE"
-#   [[ -z $MODE ]] && print "$fg[green]Using default modes."
-   print "${reset_color}"
-#   if [[ $module[1] != ./. ]]; then module="$PWD/$module"; fi
 }
 parse_options $*
 # }}}
@@ -541,11 +574,10 @@ cat << EOX
 #   /usr/share/doc/xserver-xorg/   and
 #   http://wiki.x.org/wiki/Home    and
 #   http://ftp.x.org/pub/X11R7.0/doc/html/index.html for information on Xorg
-#   /usr/share/doc/xfree86-common/                   for information on XFree86
 # Refer to the xorg.conf man page and to
 # http://ftp.x.org/pub/X11R7.0/doc/html/xorg.conf.5.html
 # for details about the format of this file.
-# 
+#
 # If you would like this file to be automatically reconfigured by debian,
 # run the following command:
 #   sudo dpkg-reconfigure -phigh xserver-xorg
@@ -566,32 +598,13 @@ Section "ServerFlags"
 EndSection
 
 Section "Files"
-#        RgbPath      "/usr/X11R6/lib/X11/rgb"
-#        ModulePath   "/usr/X11R6/lib/modules"
-# More information:  http://ftp.x.org/pub/X11R7.0/doc/html/fonts.html
+        # More information:  http://ftp.x.org/pub/X11R7.0/doc/html/fonts.html
 $XFONTS
-# check:
-#       FontPath     "/usr/X11R6/lib/X11/fonts/Speedo"
-#       FontPath     "/usr/X11R6/lib/X11/fonts/PEX"
-#       FontPath     "/usr/X11R6/lib/X11/fonts/encodings"
-#       FontPath     "/usr/X11R6/lib/X11/fonts/Type1
-#       FontPath     "/usr/X11R6/lib/X11/fonts/util
-# Additional fonts: Locale, Gimp, TTF...
-#       FontPath     "/usr/X11R6/lib/X11/fonts/cyrillic"
-#       FontPath     "/usr/X11R6/lib/X11/fonts/latin2/75dpi"
-#       FontPath     "/usr/X11R6/lib/X11/fonts/latin2/100dpi"
-# True type and type1 fonts are also handled via xftlib, see /etc/X11/XftConfig!
-        FontPath     "/usr/X11R6/lib/X11/fonts/Type1"
-        FontPath     "/usr/share/fonts/ttf/western"
-        FontPath     "/usr/share/fonts/ttf/decoratives"
-#        FontPath     "/usr/share/fonts/truetype"
-#        FontPath     "/usr/share/fonts/truetype/openoffice"
+        # FontPath     "/usr/share/fonts/ttf/western"
+        # FontPath     "/usr/share/fonts/ttf/decoratives"
         FontPath     "/usr/share/fonts/truetype/ttf-bitstream-vera"
-#       FontPath     "/usr/share/fonts/truetype/latex-xft-fonts"
         FontPath     "/usr/share/fonts/latex-ttf-fonts"
         FontPath     "/var/lib/defoma/x-ttcidfont-conf.d/dirs/TrueType"
-#       FontPath     "/usr/X11R6/lib/X11/fonts/defoma/TrueType"
-#       FontPath     "/usr/X11R6/lib/X11/fonts/defoma/CID"
 EndSection
 
 # Modules - see /usr/X11R6/lib/modules/fonts and /usr/X11R6/lib/modules/extensions
@@ -628,7 +641,7 @@ Section "InputDevice"
         Identifier  "Keyboard0"
         Option      "CoreKeyboard"
         $KEYBOARD
-	# Option      "XkbOptions" "ctrl:swapcaps,grp:alt_shift_toggle,grp_led:scroll,compose:menu"
+        # Option      "XkbOptions" "ctrl:swapcaps,grp:alt_shift_toggle,grp_led:scroll,compose:menu"
 EndSection
 
 # More information: http://ftp.x.org/pub/X11R7.0/doc/html/mouse.html
@@ -666,11 +679,11 @@ Section "Device"
         # Option "RenderAccel" "true"
         # Option "AllowGLXWithComposite" "true"
         Identifier  "Card0"
-# The following line is auto-generated by grml-x
+        # The following line is auto-generated by grml-x
         Driver      "$MODULE"
         VendorName  "All"
         BoardName   "All"
-        ## Workaround for drivers which send output to wrong device:
+        ## Workaround for drivers (for example radeon) which might send output to wrong device:
         # Option "MonitorLayout" "LVDS, AUTO"
         # Option "MonitorLayout" "LVDS, CRT"
         # Option "MonitorLayout" "NONE, STV"
@@ -745,13 +758,15 @@ function writeconfig
     print -n "$bold_color$fg[blue]Creating $XCONFIG: $fg[red]"
     writeit && print "$fg[green]done$reset_color"
   else
-    print "$bold_color$fg[blue]Notice: $XCONFIG exists already.
+    if [ -z "$FORCE" ] ; then
+       print "$bold_color$fg[blue]Notice: $XCONFIG exists already.
 Use the force-option (-force) to force creation.
 $fg[red]"
+    fi
   fi
   if [[ -n "$FORCE" ]] ; then
-    print "$bold_color$fg[blue]Force-switch or manual option(s) detected -"
-    print -n "moving eventual existing $XCONFIG to ${XCONFIG}.old: $fg[red]"
+    print "$bold_color$fg[blue]Force-switch or manual option(s) detected:"
+    print -n "\-> Moving eventual existing $XCONFIG to ${XCONFIG}.old: $fg[red]"
     writeit && print "$fg[green]done$reset_color"
   fi
 }
@@ -761,7 +776,7 @@ $fg[red]"
 function runit
 {
   writeconfig
-  if [ -z $NOSTART ] ; then
+  if [ -z "$NOSTART" ] ; then
     print "$reset_color"
     if [ -x /etc/init.d/xorg-common ] ; then
       sudo /etc/init.d/xorg-common start
@@ -771,7 +786,7 @@ function runit
       fi
     fi
     print ""
-    if [ -z $DISPLAY ] ; then
+    if [ -z "$DISPLAY" ] ; then
       print "$bold_color$fg[green]Now trying to run startx.$reset_color"
       startx ~/.xinitrc -- $XOPTS
     else
@@ -779,7 +794,7 @@ function runit
       startx ~/.xinitrc -- :$DISPLAY $XOPTS
     fi
   else
-    print "$bold_color$fg[blue]Not running startx as requested as option.$reset_color"
+    print "$bold_color$fg[blue]Not running startx as requested via option.$reset_color"
   fi
   return 1
 }
@@ -789,15 +804,14 @@ function runit
 function failed
 {
   print "$fg[red]"
-  if [ $UID != 0 ] ; then
+  if [ -z "$ROOT" ] ; then
     if [[ $(tty) == /dev/pts/* ]] ; then
       print "It seems you are running $PROGRAMNAME from inside GNU screen.
 Notice that this might fail if running as user grml!
 Please exit screen and try to run $PROGRAMNAME again."
     fi
   fi
-  print "
-Problems? Run the following commands for getting information on your hardware:
+  print "Run the following commands for getting information on your hardware:
   hwinfo --gfxcard
   discover -v --data-path=xfree86/server/device/driver display
   xdebconfigurator -c -d -i -x
@@ -805,7 +819,7 @@ Problems? Run the following commands for getting information on your hardware:
 
 Do you want to go the debian way of life? Run:
   apt-get install x-window-system-core read-edid mdetect hwinfo xdebconfigurator
-  dpkg-reconfigure x-window-system-core (or xserver-xfree86 or xserver-xorg depending on your system)
+  dpkg-reconfigure x-window-system-core (or xserver-xorg depending on your system)
 
 Problems with the module used for X? Try to load another one or
 fall back to module vesa:
@@ -828,6 +842,12 @@ Monitor frequency too high or too low? Just specify hsync/vsync manually:
 Want to adjust the resolution? Use the mode-switch:
   $PROGRAMNAME -mode 1024x768 ...
   $PROGRAMNAME -mode '1280x1024 1024x768' ...
+
+Problems? Use vesa with resolution 1024x768:
+  $PROGRAMNAME -module vesa -mode 1024x768 ...
+
+Still problems with X? Use the fallback option:
+  $PROGRAMNAME -fallback ...
 
 To adjust resolution while running X execute:
   xrandr -s '1024x768'
@@ -853,7 +873,7 @@ cleanup
 # }}}
 
 # xinitrc {{{
-  if [ -w $XINITRC ] ; then
+  if [ -w "$XINITRC" ] ; then
     sed -i "s|^[^#]*exec.*|  exec $WINDOWMANAGER|g" $XINITRC
     runit || failed
   else

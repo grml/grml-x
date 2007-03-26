@@ -1,3 +1,19 @@
+grml-x (0.3.18) unstable; urgency=low
+
+  The 'I'm sure that many changes break anything'-release.
+
+  * Big code cleanup. Removed several comments used inside
+    xorg.conf. Dropped a lot from fontpath...
+  * Check for fonts.dir inside "X11R6 backwards compatibilty
+    font stuff", otherwise we use the old font patch always...
+  * Use 'id -u' instead of $UID.
+  * Use colors only if not booted with nocolor bootoption.
+  * Work around the 'intel' driver problem [Closes: issue177]
+  * Support fallback option [Closes: issue169]
+  * Do not run hwinfo if not really necessary [Closes: issue168]
+
+ -- Michael Prokop <mika@grml.org>  Mon, 26 Mar 2007 19:40:15 +0200
+
 grml-x (0.3.17) unstable; urgency=low
 
   * Added xcursor-themes to recommends.
