@@ -11,6 +11,8 @@ grml-x (0.3.18) unstable; urgency=low
   * Work around the 'intel' driver problem [Closes: issue177]
   * Support fallback option [Closes: issue169]
   * Do not run hwinfo if not really necessary [Closes: issue168]
+  * Check whether $WINDOWMANAGER is executable at all before using
+    it in $XINITRC.
 
  -- Michael Prokop <mika@grml.org>  Mon, 26 Mar 2007 19:40:15 +0200
 

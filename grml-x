@@ -4,7 +4,7 @@
 # Authors:       grml-team (grml.org), (c) Michael Prokop <mika@grml.org>
 # Bug-Reports:   see http://grml.org/bugs/
 # License:       This file is licensed under the GPL v2.
-# Latest change: Mon Mär 26 21:26:31 CEST 2007 [mika]
+# Latest change: Mon Mär 26 22:11:44 CEST 2007 [mika]
 ################################################################################
 
 # debugging {{{
@@ -29,7 +29,7 @@
     exit 1
   fi
 
-  check4root && ROOT='1' || ROOT=''
+  check4root &>/dev/null && ROOT='1' || ROOT=''
 # }}}
 
 # set variables  {{{
@@ -788,10 +788,10 @@ function runit
     print ""
     if [ -z "$DISPLAY" ] ; then
       print "$bold_color$fg[green]Now trying to run startx.$reset_color"
-      startx ~/.xinitrc -- $XOPTS
+      startx $XINITRC -- $XOPTS
     else
       print "$bold_color$fg[green]Now trying to run startx on display $DISPLAY.$reset_color"
-      startx ~/.xinitrc -- :$DISPLAY $XOPTS
+      startx $XINITRC -- :$DISPLAY $XOPTS
     fi
   else
     print "$bold_color$fg[blue]Not running startx as requested via option.$reset_color"
@@ -873,6 +873,10 @@ cleanup
 # }}}
 
 # xinitrc {{{
+  if ! [ -x "$(which $WINDOWMANAGER)" ] ; then
+     print "$bg[black]$fg[red]${bold_color}Fatal: windowmanager $fg[blue]$WINDOWMANAGER$fg[red] not executable, startx won' work.${reset_color}">&2
+     bailout
+  fi
   if [ -w "$XINITRC" ] ; then
     sed -i "s|^[^#]*exec.*|  exec $WINDOWMANAGER|g" $XINITRC
     runit || failed
