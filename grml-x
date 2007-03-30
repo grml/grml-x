@@ -728,6 +728,8 @@ Section "Screen"
         EndSubSection
 EndSection
 
+# Make sure you have the relevant Debian packages on your system
+# to be able to use DRI (libgl1-mesa-dri for example)
 Section "DRI"
         Mode 0666
 EndSection

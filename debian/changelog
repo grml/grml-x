@@ -1,3 +1,9 @@
+grml-x (0.3.19) unstable; urgency=low
+
+  * Mention package libgl1-mesa-dri in comments for DRI.
+
+ -- Michael Prokop <mika@grml.org>  Sat, 31 Mar 2007 00:25:19 +0200
+
 grml-x (0.3.18) unstable; urgency=low
 
   The 'I'm sure that many changes break anything'-release.
