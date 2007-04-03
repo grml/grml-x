@@ -4,7 +4,7 @@
 # Authors:       grml-team (grml.org), (c) Michael Prokop <mika@grml.org>
 # Bug-Reports:   see http://grml.org/bugs/
 # License:       This file is licensed under the GPL v2.
-# Latest change: Mon Mär 26 22:19:37 CEST 2007 [mika]
+# Latest change: Die Apr 03 21:18:57 CEST 2007 [mika]
 ################################################################################
 
 # debugging {{{
@@ -747,6 +747,12 @@ EOX
 writeit() {
     XCONFTMP="/tmp/xconfig.$$"
     xconfig > $XCONFTMP
+    # we do not want to have two CorePointers, deactivate one therefore
+    if grep -Eq '^[[:space:]]+InputDevice[ ]+"USB Mouse"[ ]+"CorePointer"' $XCONFTMP ; then
+       if grep -Eq '^[[:space:]]+InputDevice[ ]+"PS/2 Mouse"[ ]+"CorePointer"' $XCONFTMP ; then
+          sed -i 's|InputDevice.*PS/2.*CorePointer|# & # deactivated to avoid two CorePointers|' $XCONFTMP
+       fi
+    fi
     [ -f $XCONFIG ] && sudo mv -f $XCONFIG $XCONFIG.old
     sudo mv $XCONFTMP $XCONFIG
     sudo chown root.root $XCONFIG

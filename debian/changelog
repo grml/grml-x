@@ -1,3 +1,10 @@
+grml-x (0.3.20) unstable; urgency=low
+
+  * Avoid presence of two CorePointers, disable the PS/2 entry then.
+    [Testing: issue184]
+
+ -- Michael Prokop <mika@grml.org>  Tue,  3 Apr 2007 21:20:21 +0200
+
 grml-x (0.3.19) unstable; urgency=low
 
   * Mention package libgl1-mesa-dri in comments for DRI.
