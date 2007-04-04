@@ -1,3 +1,11 @@
+grml-x (0.3.21) unstable; urgency=low
+
+  * Big rewrite of grml-x: heavy use of evdev. Thanks for idea
+    to gebi! Now the options -nousb and -nops2 have been dropped
+    and were replaced by -ps2 and -usb. More details in the manpage.
+
+ -- Michael Prokop <mika@grml.org>  Wed,  4 Apr 2007 16:26:43 +0200
+
 grml-x (0.3.20) unstable; urgency=low
 
   * Avoid presence of two CorePointers, disable the PS/2 entry then.

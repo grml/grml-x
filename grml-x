@@ -4,7 +4,7 @@
 # Authors:       grml-team (grml.org), (c) Michael Prokop <mika@grml.org>
 # Bug-Reports:   see http://grml.org/bugs/
 # License:       This file is licensed under the GPL v2.
-# Latest change: Die Apr 03 21:18:57 CEST 2007 [mika]
+# Latest change: Mit Apr 04 16:26:39 CEST 2007 [mika]
 ################################################################################
 
 # debugging {{{
@@ -52,12 +52,12 @@
 
   XSERVER="Xorg"
   XCONFIG='/etc/X11/xorg.conf'
-  KEYBOARD="Driver      \"kbd\"
-        # Option      \"XkbRules\"   \"xfree86\"
-        Option      \"XkbRules\"   \"xorg\"
-        Option      \"XkbModel\"   \"pc105\"
-        Option      \"XkbLayout\"  \"${XKEYBOARD},us\"
-        # Option      \"XkbVariant\" \"nodeadkeys\""
+  KEYBOARD="# Driver      \"kbd\"
+#         Option      \"XkbRules\"   \"xfree86\"
+#         Option      \"XkbRules\"   \"xorg\"
+#         Option      \"XkbModel\"   \"pc105\"
+#         Option      \"XkbLayout\"  \"${XKEYBOARD},us\"
+#         Option      \"XkbVariant\" \"nodeadkeys\""
 
   # check for font path
   if [ -d /usr/share/fonts/X11 ] ; then
@@ -128,7 +128,6 @@ Examples:
   $PROGRAMNAME -nosynaptics fluxbox
   $PROGRAMNAME -nosync fluxbox
   $PROGRAMNAME -noddc wmii
-  $PROGRAMNAME -nousb fluxbox
   $PROGRAMNAME -module radeon -mode 1024x768 -vsync 60 wmi
   XINITRC=~/.xinitrc $PROGRAMNAME ion
   $PROGRAMNAME -display 8 wmii
@@ -236,7 +235,6 @@ EndSection
     if grep -q 'Device:.*ALPS' "$MOUSEINFO" ; then
      if [[ "$SYNAPTICS" == "yes" ]] ; then # check for '-nosynaptics'-option
       MOUSEDRIVER='synaptics'
-      # SYNMOUSE='InputDevice    "Synaptics" "CorePointer"'
       SYNMOUSE='InputDevice    "Synaptics"  "AlwaysCore"'
       SYNMOUSEDETAIL="
 Section \"InputDevice\"
@@ -274,14 +272,13 @@ EndSection
       SYNMOUSE='# No alps touchpad detected.'
      fi
     else
-      SYNMOUSE='# No alps touchpad present.'
+      SYNMOUSE='# No synaptics/alps touchpad present.'
     fi
    fi
 
    # USB-PS/2 Optical Mouse
-   if ! [[ -n $NOUSB ]] ; then
-     USB='yes'
-     USBMOUSE='InputDevice    "USB Mouse"  "CorePointer"'
+   if [ -n "$USE_USB" ] ; then
+     USBMOUSE='InputDevice    "USB Mouse"     "CorePointer"'
      USBMOUSEDETAIL="
 Section \"InputDevice\"
         Identifier      \"USB Mouse\"
@@ -294,14 +291,14 @@ Section \"InputDevice\"
 EndSection
 "
    else
-     USBMOUSE='# Deactivated USB Mouse as requested.'
+     USBMOUSE='# InputDevice    "USB Mouse"     "CorePointer"'
+     USBMOUSEDETAIL=''
    fi
 
    if grep -q 'Device:.*Serial' "$MOUSEINFO" ; then
      SERIAL='yes'
-     SERMOUSE='InputDevice    "Serial Mouse" "CorePointer"'
-     SERMOUSEDETAIL="
-Section \"InputDevice\"
+     SERMOUSE='InputDevice    "Serial Mouse"     "CorePointer"'
+     SERMOUSEDETAIL="Section \"InputDevice\"
         Identifier  \"Serial Mouse\"
         Driver      \"mouse\"
         Option      \"Device\" \"/dev/ttyS0\"
@@ -313,16 +310,15 @@ EndSection
 "
    else
      SERMOUSE='# No serial mouse detected.'
+     SERMOUSEDETAIL=''
    fi
 
    # ImExPS/2 Logitech Explorer Mouse
    # "PS2++ Logitech MX Mouse"
-   if ! [[ -n $NOPS2 ]] ; then
-     if grep -qE 'Device:.*PS.?2' "$MOUSEINFO" ; then
-       PS2='yes'
-       PS2MOUSE='InputDevice    "PS/2 Mouse" "CorePointer"'
-       PS2MOUSEDETAIL="
-Section \"InputDevice\"
+   if [ -n "$USE_PS2" ] ; then
+      PS2='yes'
+      PS2MOUSE='InputDevice    "PS/2 Mouse"    "CorePointer"'
+      PS2MOUSEDETAIL="Section \"InputDevice\"
         Identifier  \"PS/2 Mouse\"
         Driver      \"mouse\"
         Option      \"Device\" \"/dev/input/mice\"
@@ -334,34 +330,24 @@ Section \"InputDevice\"
 EndSection
 "
      else
-       PS2MOUSE='# No PS/2 mouse detected.'
-       PS2MOUSEDETAIL=""
+      PS2MOUSE='# InputDevice    "PS/2 Mouse"    "CorePointer"'
+      PS2MOUSEDETAIL=''
      fi
-   else
-     PS2MOUSE='# Deactivated PS/2 Mouse as requested.'
-   fi
 
-   if [[ -n $GENERICMOUSE ]] ; then
-     GENERIC='yes'
-     GENERICMOUSE='InputDevice    "Generic Mouse" "CorePointer"'
-     GENERICMOUSEDETAIL="
-Section \"InputDevice\"
-        Identifier  \"Generic Mouse\"
-        Driver      \"mouse\"
-        Option      \"Device\" \"/dev/input/mice\"
-        Option      \"Protocol\" \"auto\"
-        Option      \"Buttons\" \"5\"
-        Option      \"ZAxisMapping\" \"4 5\"
-EndSection
+     EVDEV_MOUSE="# Section \"InputDevice\"
+#         Identifier      \"Generic Mouse\"
+#         Driver          \"evdev\"
+#         Option          \"Device\"                \"/dev/input/mice\"
+#         Option          \"Protocol\"              \"auto\"
+#         Option          \"ZAxisMapping\"          \"4 5\"
+#         Option          \"Buttons\"               \"5\"
+#         Option          \"SendCoreEvents\"        \"true\"
+# EndSection
 "
-   else
-     GENERICMOUSE='# No generic mouse configured.'
-   fi
 
    MOUSE="        $USBMOUSE
         $PS2MOUSE
         $SYNMOUSE
-        $GENERICMOUSE
         $SERMOUSE"
 }
 # }}}
@@ -373,7 +359,7 @@ parse_options()
                     vsync:=o_vsync hsync:=o_hsync mode:=o_mode force=o_force display:=o_display   \
                     nostart=o_nostart nodpms=o_nodpms nosynaptics=o_nosynaptics nousb=o_nousb \
                     nops2=o_nops2 genmouse=o_genmouse novref=o_novref nohsync=o_nohsync \
-                    fallback=o_fallback
+                    fallback=o_fallback usb=o_usb ps2=o_ps2
 
    if [[ $# == 0 || "$o_help" != "" || "$1" == '-h' || "$1" == '--help' ]]; then
       usage
@@ -413,11 +399,19 @@ parse_options()
    fi
 
    if [[ "$o_nousb" != "" ]]; then
-      NOUSB='yes'
+      echo 'Warning: option -nousb is deprecated.'>&2
+   fi
+
+   if [[ "$o_usb" != "" ]]; then
+      USE_USB='yes'
    fi
 
    if [[ "$o_nops2" != "" ]]; then
-      NOPS2='yes'
+      echo 'Warning: optino -nops2 is deprecated˙'>&2
+   fi
+
+   if [[ "$o_ps2" != "" ]]; then
+      USE_PS2='yes'
    fi
 
    if [[ "$o_genmouse" != "" ]]; then
@@ -440,7 +434,7 @@ parse_options()
 
    if [[ "$XKEYBOARD" == de ]] ; then
       KEYBOARD="$KEYBOARD
-      Option      \"XkbVariant\" \"nodeadkeys\""
+#         Option      \"XkbVariant\" \"nodeadkeys\""
    fi
 
    if [ -n "$FORCE" -o ! -r "$XCONFIG" -a -z "$FALLBACK" ] ; then
@@ -587,7 +581,8 @@ cat << EOX
 Section "ServerLayout"
         Identifier     "XServer Configured"
         Screen      0  "Screen0" 0 0
-        InputDevice    "Keyboard0"  "CoreKeyboard"
+        # InputDevice    "Keyboard0"     "CoreKeyboard"
+        # InputDevice    "Generic Mouse" "CorePointer"
 $MOUSE
 EndSection
 
@@ -617,6 +612,7 @@ Section "Module"
         Load  "freetype"  # font rendering
         Load  "extmod"    # some commonly used server extensions (e.g. shape extension)
         Load  "record"    # recording extension
+        Load  "evdev"     # generic input handling driver on Linux
         # Load  "vbe"       # Vesa BIOS Extension
         # Load  "ddc"       # ddc probing of monitor
         # Load  "bitmap"    # bitmap fonts
@@ -625,7 +621,6 @@ Section "Module"
         # Load  "int10"     # initialize graphics cards via int10 call to the BIOS
         # Load  "speedo"    # font module
         # Load  "v4l"       # Video for Linux
-        # Load  "evdev"     # generic input handling driver on Linux
 # Valid entries - see /usr/lib/xorg/modules/[extensions/]
 # afb bitmap cfb cfb16 cfb24 cfb32 cw damage dbe ddc dri drm extmod fb
 # fbdevhw freetype GLcore glx i2c int10 int10 layer mfb pcidata rac ramdac
@@ -638,19 +633,19 @@ EndSection
 # Or if you just want both to be control, use:
 # Option "XkbOptions" "ctrl:nocaps"
 # More information: http://ftp.x.org/pub/X11R7.0/doc/html/XKB-Config.html
-Section "InputDevice"
-        Identifier  "Keyboard0"
-        Option      "CoreKeyboard"
-        $KEYBOARD
-        # Option      "XkbOptions" "ctrl:swapcaps,grp:alt_shift_toggle,grp_led:scroll,compose:menu"
-EndSection
+# Section "InputDevice"
+#         Identifier  "Keyboard0"
+#         Option      "CoreKeyboard"
+#         $KEYBOARD
+#         # Option      "XkbOptions" "ctrl:swapcaps,grp:alt_shift_toggle,grp_led:scroll,compose:menu"
+# EndSection
 
 # More information: http://ftp.x.org/pub/X11R7.0/doc/html/mouse.html
-$GENERICMOUSEDETAIL
 $USBMOUSEDETAIL
 $PS2MOUSEDETAIL
 $SERMOUSEDETAIL
 $SYNMOUSEDETAIL
+$EVDEV_MOUSE
 Section "Monitor"
         Identifier   "Monitor0"
 #       ModelName    "Old Monitor (no DDC)"

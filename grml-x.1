@@ -33,8 +33,7 @@ X config file (/etc/X11/xorg.conf or /etx/X11/XFree86Config-4) is renamed
 via adding the extension .old.
 .TP
 .B \-genmouse
-Generate generic entry for mouse using /dev/input/mice and auto protocol. This option
-is useful in combination with '-nousb -nops2' for example in VMWare.
+Generate generic entry for mouse using /dev/input/mice and auto protocol.
 .TP
 .B \-help
 Display help.
@@ -54,9 +53,6 @@ Do not use ddc probing but use static entries for resolution modes.
 .B \-nohsnc
 Do not activate HorizSync-entry in xconfig file.
 .TP
-.B \-nops2
-Deactivate entry for PS/2 mouse.
-.TP
 .B \-nostart
 Do not start X server.
 .TP
@@ -69,11 +65,14 @@ Do not activate horizontal and vertical sync frequencies. This option is useful
 on many modern computers using a LCD/TFT display. To avoid problems on very old
 monitors this option is not the default.
 .TP
-.B \-nousb
-Do not set an entry for USB mouse in the xconfig file.
-.TP
 .B \-novref
 Do not activate VertRefresh-entry in xconfig file.
+.TP
+.B \-ps2
+Add an entry for PS/2 mouse in the xconfig file.
+.TP
+.B \-usb
+Add an entry for USB mouse in the xconfig file.
 .TP
 .B \-vsync <number>
 Specify vertical sync frequencies. Use a number like "50-60".
