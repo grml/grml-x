@@ -1,3 +1,9 @@
+grml-x (0.3.22) unstable; urgency=low
+
+  * Updated zsh completion for grml-x. Thanks, ft!
+
+ -- Michael Prokop <mika@grml.org>  Tue, 17 Apr 2007 09:15:38 +0200
+
 grml-x (0.3.21) unstable; urgency=low
 
   * Big rewrite of grml-x: heavy use of evdev. Thanks for idea
