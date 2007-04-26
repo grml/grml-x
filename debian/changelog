@@ -1,3 +1,10 @@
+grml-x (0.3.23) unstable; urgency=low
+
+  * Add grml-shlib to depends as we use one function from
+    /etc/grml/sh-lib.
+
+ -- Michael Prokop <mika@grml.org>  Fri, 27 Apr 2007 01:32:15 +0200
+
 grml-x (0.3.22) unstable; urgency=low
 
   * Updated zsh completion for grml-x. Thanks, ft!
