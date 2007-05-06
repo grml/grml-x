@@ -1,3 +1,10 @@
+grml-x (0.3.24) unstable; urgency=low
+
+  * Update /etc/X11/xorg.conf.vmware, allowing higher resolutions
+    by default and use evdev.
+
+ -- Michael Prokop <mika@grml.org>  Sun,  6 May 2007 16:27:34 +0200
+
 grml-x (0.3.23) unstable; urgency=low
 
   * Add grml-shlib to depends as we use one function from
