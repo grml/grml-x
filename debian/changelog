@@ -1,3 +1,10 @@
+grml-x (0.3.25) unstable; urgency=low
+
+  * Drop -xserver option from zsh completion as it's not supported
+    anymore (X.org is available on any Debian system now :)).
+
+ -- Michael Prokop <mika@grml.org>  Sun, 27 May 2007 21:54:37 +0200
+
 grml-x (0.3.24) unstable; urgency=low
 
   * Update /etc/X11/xorg.conf.vmware, allowing higher resolutions

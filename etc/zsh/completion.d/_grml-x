@@ -4,7 +4,7 @@
 # Authors:       grml-team (grml.org), (c) Michael Prokop <mika@grml.org>
 # Bug-Reports:   see http://grml.org/bugs/
 # License:       This file is licensed under the GPL v2.
-# Latest change: Tue Apr 17 01:53:45 CEST 2007 [ft]
+# Latest change: Son Mai 27 21:54:19 CEST 2007 [mika]
 ################################################################################
 
 local arguments wm
@@ -36,7 +36,6 @@ arguments=(
   '-ps2[add entry for PS/2 mouse]'
   '-usb[add entry for USB mouse]'
   '-vsync:vertical sync frequencies (<number>):(43 `seq 45 5 70` 72)'
-  '-xserver:xserver used for creation of xconfig file:(XFree86 X.org)'
   ':window manager:($wms)'
 )
 _arguments -s $arguments
