@@ -1,3 +1,9 @@
+grml-x (0.3.26) unstable; urgency=low
+
+  * Added some more comments to the X modules.
+
+ -- Michael Prokop <mika@grml.org>  Wed, 06 Jun 2007 13:02:18 +0200
+
 grml-x (0.3.25) unstable; urgency=low
 
   * Drop -xserver option from zsh completion as it's not supported
