@@ -4,7 +4,7 @@
 # Authors:       grml-team (grml.org), (c) Michael Prokop <mika@grml.org>
 # Bug-Reports:   see http://grml.org/bugs/
 # License:       This file is licensed under the GPL v2.
-# Latest change: Son Mai 27 21:54:19 CEST 2007 [mika]
+# Latest change: Die Jul 10 16:31:47 CEST 2007 [mika]
 ################################################################################
 
 local arguments wm
@@ -13,8 +13,8 @@ local -a wms
 wms=()
 
 for wm in blackbox dwm evilwm fluxbox fvwm fvwm2 fvwm-crystal gnome-session  \
-          gnomesession icewm ion2 ion3 jwm pekwm pwm3 ratpoison startkde twm \
-          w9wm windowlab wmi wmii wm-ng xfce4 xfwm4 ; do
+          gnomesession icewm ion2 ion3 jwm openbox pekwm pwm3 ratpoison      \
+	  startkde twm w9wm windowlab wmi wmii wm-ng xfce4 xfwm4 ; do
   [ -x /usr/bin/$wm ] && wms+=$wm
 done
 

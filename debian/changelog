@@ -1,3 +1,9 @@
+grml-x (0.3.27) unstable; urgency=low
+
+  * /etc/zsh/completion.d/_grml-x: support openbox
+
+ -- Michael Prokop <mika@grml.org>  Tue, 10 Jul 2007 16:31:52 +0200
+
 grml-x (0.3.26) unstable; urgency=low
 
   * Added some more comments to the X modules.
