@@ -4,7 +4,7 @@
 # Authors:       grml-team (grml.org), (c) Michael Prokop <mika@grml.org>
 # Bug-Reports:   see http://grml.org/bugs/
 # License:       This file is licensed under the GPL v2.
-# Latest change: Die Jul 10 16:31:47 CEST 2007 [mika]
+# Latest change: Don Jul 12 01:27:03 CEST 2007 [mika]
 ################################################################################
 
 local arguments wm
@@ -12,13 +12,14 @@ local -a wms
 
 wms=()
 
-for wm in blackbox dwm evilwm fluxbox fvwm fvwm2 fvwm-crystal gnome-session  \
-          gnomesession icewm ion2 ion3 jwm openbox pekwm pwm3 ratpoison      \
+for wm in blackbox dwm evilwm fluxbox fvwm fvwm2 fvwm-crystal gnome-session   \
+          gnomesession icewm ion2 ion3 jwm openbox pekwm pwm3 ratpoison       \
 	  startkde twm w9wm windowlab wmi wmii wm-ng xfce4 xfwm4 ; do
-  [ -x /usr/bin/$wm ] && wms+=$wm
+    [ -x /usr/bin/$wm ] && wms+=$wm
 done
 
 arguments=(
+  '-composite[enable composite extension (disabled by default)]'
   '-display:display for xserver:(7 8)'
   '-force[force creation of xconfig file]'
   '-help:[display help]'
@@ -36,6 +37,7 @@ arguments=(
   '-ps2[add entry for PS/2 mouse]'
   '-usb[add entry for USB mouse]'
   '-vsync:vertical sync frequencies (<number>):(43 `seq 45 5 70` 72)'
+  '-xinerama[try to set up multihead using Xinerama setup]'
   ':window manager:($wms)'
 )
 _arguments -s $arguments
