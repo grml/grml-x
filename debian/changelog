@@ -1,3 +1,12 @@
+grml-x (0.3.28) unstable; urgency=low
+
+  * Initial support for Xinemera setup using -xinerama option.
+    [Testing: issue241]
+  * Support activating composite extension on cmdline using
+    the -composite option. (By default it's deactivated.)
+
+ -- Michael Prokop <mika@grml.org>  Thu, 12 Jul 2007 01:20:52 +0200
+
 grml-x (0.3.27) unstable; urgency=low
 
   * /etc/zsh/completion.d/_grml-x: support openbox

@@ -4,7 +4,7 @@
 # Authors:       grml-team (grml.org), (c) Michael Prokop <mika@grml.org>
 # Bug-Reports:   see http://grml.org/bugs/
 # License:       This file is licensed under the GPL v2.
-# Latest change: Mit Apr 04 16:26:39 CEST 2007 [mika]
+# Latest change: Don Jul 12 01:20:47 CEST 2007 [mika]
 ################################################################################
 
 # debugging {{{
@@ -166,12 +166,88 @@ mode()
    [ -r "$MONITORINFO" ] || monitor # get monitor settings
    modes=$(perl -e 'while (<STDIN>) {if (/  Resolution:/) { s/.*\s+(\d+x\d+).*/$1/; print} }' < $MONITORINFO |
 sort -nur | perl -ne 's/\s+/ /; s/(\d+x\d+)/"$1"/; print')
+
+   if [ -n "$XINERAMA" ] ; then
+
+      print "$fg[green]
+
+Option for $fg[yellow]Xinerama$fg[green] found, please use xrandr inside X.org for your further configuration!
+Trying to identify monitors now..."
+
+      # Currently we only know that it works with current intel driver,
+      # so inform user about that:
+      if [[ "$MODULE" != "intel" ]] ; then
+              print "$fg[red]
+
+Warning: using a non-intel driver - trying Xinerama setup anyway.
+If it worked please contact grml developers providing information
+about your setup so we can adjust grml-x according!
+
+      -> http://grml.org/contact/
+
+Sleeping for 10 seconds now... Will continue then...
+Just press Ctrl-C to cancel operation.
+"
+#             sleep 10 # FIXME
+      fi
+
+      # make sure we have information from 2 monitors:
+      # - first one from 'hwinfo --monitor'      => $MONITORINFO
+      # - second one from 'hwinfo --framebuffer' => $FRAMEBUFFER
+      FRAMEBUFFER=$(hwinfo --framebuffer | grep 'Mode 0x.* bits' | head -1)
+      if [ -z "$FRAMEBUFFER" ] ; then
+         print "$fg[red]
+Fatal: could not identify two monitors - no chance to
+       set up multihead using Xinerama - sorry. :-(
+
+Please run grml-x without the -xinerama option and contact
+grml developers if you have any further useful information.
+       => http://grml.org/bugs/
+"
+         bailout 10
+      fi
+
+      # check whether we can read the $MONITORINFO file
+      if ! [ -r "$MONITORINFO" ] ; then
+         print "$fg[red]
+Fatal: could not identify monitor - no chance to
+       set up multihead using Xinerama - sorry. :-(
+"
+         bailout 11
+      else
+         # now calculate Virtual size for use with Xinerama
+         HORIZ_RES1="$(grep 'Max. Resolution:' $MONITORINFO | sed 's/    Max\. Resolution: \(.*\)x\(.*\)/\1/')"
+         VERIZ_RES1="$(grep 'Max. Resolution:' $MONITORINFO | sed 's/    Max\. Resolution: \(.*\)x\(.*\)/\2/')"
+
+         HORIZ_RES2="$(echo $FRAMEBUFFER | sed 's/  Mode 0x.*: \(.*\)x.*/\1/')"
+         VERIZ_RES2="$(echo $FRAMEBUFFER | sed 's/  Mode 0x.*x\(.*\) (.*/\1/')"
+
+         if [ -n "$HORIZ_RES1" -a -n "$VERIZ_RES1" -a -n "$HORIZ_RES2" ] ; then
+            if [ $(echo $VERIZ_RES1 - $VERIZ_RES2 | bc -l) -eq 0 ] ; then
+            VERIZ_RESULT="$VERIZ_RES1"
+            elif [ "$VERIZ_RES1" -gt "$VERIZ_RES2" ] ; then
+               VERIZ_RESULT="$VERIZ_RES1"
+            else
+               VERIZ_RESULT="$VERIZ_RES2"
+            fi
+
+            HORIZ_RESULT=$(echo $HORIZ_RES1 + $HORIZ_RES2 | bc -l)
+
+            # important: keep newline for appropriate placing below $MODES!
+            if [ -n "$HORIZ_RESULT" ] ; then
+               VIRTUAL="
+                   Virtual $HORIZ_RESULT $VERIZ_RES1"
+            fi
+         fi
+       fi
+   fi
+
    if [[ -n $NODDC ]] ; then
-     MODES='Modes "1024x768" "800x600" "640x480"  "1600x1200" "1280x1024" "1280x960"'
+     MODES="Modes \"1024x768\" \"800x600\" \"640x480\"  \"1600x1200\" \"1280x1024\" \"1280x960\"$VIRTUAL"
    elif [[ "$modes" == "\"1024x768\" " || -z $modes ]] ; then
-     MODES='# Modes "1024x768" "800x600" "640x480"  "1600x1200" "1280x1024" "1280x960"'
+     MODES="# Modes \"1024x768\" \"800x600\" \"640x480\"  \"1600x1200\" \"1280x1024\" \"1280x960\"$VIRTUAL"
    else
-     MODES="# Modes $modes"
+     MODES="# Modes $modes$VIRTUAL"
    fi
 }
 # }}}
@@ -359,7 +435,8 @@ parse_options()
                     vsync:=o_vsync hsync:=o_hsync mode:=o_mode force=o_force display:=o_display   \
                     nostart=o_nostart nodpms=o_nodpms nosynaptics=o_nosynaptics nousb=o_nousb \
                     nops2=o_nops2 genmouse=o_genmouse novref=o_novref nohsync=o_nohsync \
-                    fallback=o_fallback usb=o_usb ps2=o_ps2
+                    fallback=o_fallback usb=o_usb ps2=o_ps2 composite=o_composite \
+		    xinerama=o_xinerama
 
    if [[ $# == 0 || "$o_help" != "" || "$1" == '-h' || "$1" == '--help' ]]; then
       usage
@@ -473,6 +550,20 @@ parse_options()
 
      if [[ "$o_novref" != "" ]]; then
         VERTISYNC="#       VertRefresh 50.0 - 60.0  # deactivated via -novref option of grml-x"
+     fi
+
+     if [[ "$o_xinerama" != "" ]]; then
+        XINERAMA=1
+     fi
+
+     if [[ "$o_composite" != "" ]]; then
+        COMPOSITE="Section \"Extensions\"
+    Option \"Composite\" \"Enable\"
+EndSection"
+     else
+        COMPOSITE="#Section \"Extensions\"
+#    Option \"Composite\" \"Enable\"
+#EndSection"
      fi
 
      # write hwinfo stuff
@@ -617,8 +708,8 @@ Section "Module"
         # Load  "i2c"       # I2C bus
         # Load  "int10"     # initialize graphics cards via int10 call to the BIOS
         # Load  "v4l"       # Video for Linux
-	## Deprecated/unneeded modules with Xorg >=7.0:
-	# Load  "speedo"    # font module (does not exist anymore)
+        ## Deprecated/unneeded modules with Xorg >=7.0:
+        # Load  "speedo"    # font module (does not exist anymore)
         # Load  "ddc"       # ddc probing of monitor (automatically loaded)
         # Load  "GLcore"    # render OpenGL in software (automatically loaded)
         # Load  "bitmap"    # bitmap fonts (automatically loaded)
@@ -730,9 +821,7 @@ Section "DRI"
         Mode 0666
 EndSection
 
-#Section "Extensions"
-#    Option "Composite" "Enable"
-#EndSection
+$COMPOSITE
 
 ## END OF FILE #################################################################
 EOX
@@ -892,4 +981,4 @@ cleanup
 # }}}
 
 ## END OF FILE #################################################################
-# vim:foldmethod=marker
+# vim:foldmethod=marker expandtab ai ft=zsh
