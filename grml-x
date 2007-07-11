@@ -236,7 +236,7 @@ Fatal: could not identify monitor - no chance to
             # important: keep newline for appropriate placing below $MODES!
             if [ -n "$HORIZ_RESULT" ] ; then
                VIRTUAL="
-                   Virtual $HORIZ_RESULT $VERIZ_RES1"
+                Virtual $HORIZ_RESULT $VERIZ_RES1"
             fi
          fi
        fi
@@ -374,7 +374,8 @@ EndSection
    if grep -q 'Device:.*Serial' "$MOUSEINFO" ; then
      SERIAL='yes'
      SERMOUSE='InputDevice    "Serial Mouse"     "CorePointer"'
-     SERMOUSEDETAIL="Section \"InputDevice\"
+     SERMOUSEDETAIL="
+Section \"InputDevice\"
         Identifier  \"Serial Mouse\"
         Driver      \"mouse\"
         Option      \"Device\" \"/dev/ttyS0\"
@@ -394,7 +395,8 @@ EndSection
    if [ -n "$USE_PS2" ] ; then
       PS2='yes'
       PS2MOUSE='InputDevice    "PS/2 Mouse"    "CorePointer"'
-      PS2MOUSEDETAIL="Section \"InputDevice\"
+      PS2MOUSEDETAIL="
+Section \"InputDevice\"
         Identifier  \"PS/2 Mouse\"
         Driver      \"mouse\"
         Option      \"Device\" \"/dev/input/mice\"
@@ -410,7 +412,8 @@ EndSection
       PS2MOUSEDETAIL=''
      fi
 
-     EVDEV_MOUSE="# Section \"InputDevice\"
+     EVDEV_MOUSE="
+# Section \"InputDevice\"
 #         Identifier      \"Generic Mouse\"
 #         Driver          \"evdev\"
 #         Option          \"Device\"                \"/dev/input/mice\"
@@ -733,11 +736,8 @@ EndSection
 # EndSection
 
 # More information: http://ftp.x.org/pub/X11R7.0/doc/html/mouse.html
-$USBMOUSEDETAIL
-$PS2MOUSEDETAIL
-$SERMOUSEDETAIL
-$SYNMOUSEDETAIL
-$EVDEV_MOUSE
+${USBMOUSEDETAIL}${PS2MOUSEDETAIL}${SERMOUSEDETAIL}${SYNMOUSEDETAIL}${EVDEV_MOUSE}
+
 Section "Monitor"
         Identifier   "Monitor0"
 #       ModelName    "Old Monitor (no DDC)"

@@ -4,6 +4,7 @@ grml-x (0.3.28) unstable; urgency=low
     [Testing: issue241]
   * Support activating composite extension on cmdline using
     the -composite option. (By default it's deactivated.)
+  * Remove some blank lines in generated xorg.conf.
 
  -- Michael Prokop <mika@grml.org>  Thu, 12 Jul 2007 01:20:52 +0200
 

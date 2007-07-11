@@ -23,6 +23,9 @@ X config file. Adjust ~/.xinitrc to your needs and then run startx to start X se
 .B XOPTS='...'
 Provide options for startx, see 'man 1 startx'.
 .TP
+.B \-composite
+Enable composite extension within /etc/X11/xorg.conf. Disabled by default.
+.TP
 .B \-display <number>
 Specifiy display for use with Xserver.
 .TP
@@ -77,30 +80,48 @@ Add an entry for USB mouse in the xconfig file.
 .B \-vsync <number>
 Specify vertical sync frequencies. Use a number like "50-60".
 .TP
+.B \-xinerama
+Enable Xinerama support - disabled by default. Xinerama is an X server extension
+that allows multiple physical screens to behave as a single screen. With traditional
+multi-head in X11, windows cannot span or cross physical screens.
+
+Please notice that some window managers are not Xinerama-aware, and so some operations
+like window placement and resizing might not behave in an ideal way. This is an issue
+that needs to be dealt with in the individual window managers and not within grml-x
+or X server.
+.TP
 .B \-xserver [XFree86|Xorg]
 Specify Xserver which should be used for creation of xconfig file.
 For XFree86 the file /etc/X11/XF86Config-4 is written, for Xorg the
 file /etc/X11/xorg.conf.
-.SH EXAMPLES
-.TP 
+.SH USAGE EXAMPLES
+.TP
 .B grml-x -mode '1280x1024 1024x768' wmi
 Use resolutions 1280x1024 and 1024x768 and start windowmanager wmi.
 .TP
-.B grml-x -module vesa ion3
-Use vesa-module and start windowmanager ion3.
+.B grml-x -module vesa openbox
+Use vesa-module and start windowmanager openbox.
 .TP
 .B grml-x -hsync "30-65" fluxbox
 Use 30-65kHz for horizontal sync frequency and start windowmanager fluxbox.
-.TP 
+.TP
 .B grml-x -display 8 ratpoison
 Use display 8 for Xserver and start windowmanager ratpoison.
-.TP 
+.TP
+.B grml-x -xinerama -composite openbox
+Enable Xinerama setup and composite extension and start windowmanager openbox.
+.TP
 .B grml-x -nostart -f fluxbox
 Force writing of config file but do not start X server. Please do not forget to add a window manager as last option because
 grml-x changes the according exec-statement in $HOME/.xinitrc.
 .TP
 .B XOPTS='-depth 16' grml-x fluxbox
 Set color depth to 16 bit and start windowmanager fluxbox.
+.SH KNOWN PROBLEMS
+.TP
+Sometimes the X server does not find the correct resolution and/or frequency settings for the monitor. Please adjust configuration manually using the -hsync and the -vsync options then. Also check out the usage examples section in this manpage and the help output of grml-x running 'grml-x -help'.
+.TP
+The support for the Xinerama extension is brand new within grml-x and has not been tested on many boxes but only on systems using the intel driver of current X server. Please provide feedback!
 .SH BUGS
 .TP
 Please report any problems to the grml-team! http://grml.org/bugs/
