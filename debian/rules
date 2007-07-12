@@ -9,20 +9,22 @@
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
 
-build: build-stamp
+build:
+	make clean
+	make doc
 
 build-stamp:
 	dh_testdir
-
 	# Add here commands to compile the package.
 	touch build-stamp
 
 clean:
 	dh_testdir
 	dh_testroot
-	rm -f build-stamp
+	rm -f build-stamp html-stamp man-stamp grml-x.html grml-x.1 grml-x.xml
 
 	# Add here commands to clean up after the build process.
+	-$(MAKE clean)
 	dh_clean
 
 install: build
@@ -30,7 +32,6 @@ install: build
 	dh_testroot
 	dh_clean -k
 	dh_installdirs etc/init.d usr/bin
-	# usr/X11R6/lib/X11/xkb/rules/
 
 	# Add here commands to install the package into debian/grml-x.
 	install -m 755 grml-x     debian/grml-x/usr/bin/grml-x
