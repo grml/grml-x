@@ -7,24 +7,46 @@ grml-x - create xorg.conf file and start X window system on grml-system
 
 Synopsis
 --------
-grml-x [ OPTIONS ] $windowmanager_you_want_to_use
+grml-x [ options ] $windowmanager_you_want_to_use
 
 Description
 -----------
 
-grml-x creates the configuration file for the X server (X.org)
-and starts up X server with specified window manager.
+grml-x creates the configuration file for the X server (X.org) providing
+hardware detection and then starts up X server with the specified window
+manager.
 
 Implementation
 --------------
 
-grml-x uses hwinfo for getting hardware related information.  It creates the X config file /etc/X11/xorg.conf for X.org or /etc/X11/XF86Config-4 for XFree86
-(needs root permissions therefore). If a X config file is present already, grml-x won't touch the file unless the '-force' option or another option which modifies
-content of the X config file is specified, the old config file gets backed up via adding the extension .old.
+grml-x uses hwinfo for collection hardware related information for further
+processing. It creates the X configuration file /etc/X11/xorg.conf for the X
+server (X.org) and needs root permissions therefore. If a X
+config file is present already, grml-x won't touch the file unless the '-force'
+option or another option which modifies content of the X config file is
+specified. The old config file gets backed up via adding the extension .old
+(available as /etc/X11/xorg.conf.old therefore).
 
-Afterwards the 'exec' command in ~/.xinitrc gets adjusted to start the provided window manager and then startx is executed. If ~/.xinitrc does not exist a simple
-default one will be created.  Notice that you do not have to use grml-x to start X server if you already have a working X config file. Adjust ~/.xinitrc to your
-needs and then run startx to start X server.
+Afterwards the 'exec' command in $HOME/.xinitrc gets adjusted to start the provided
+window manager and then startx is executed. If $HOME/.xinitrc does not exist a
+simple default one will be created.
+
+*******************************************************************************
+Important! Please do **not** run X or grml-x with root permissions!  When used in grml
+live-cd mode running grml-x works as normal user as well (thanks to sudo). Just
+switch to an appropriate console where user grml is logged in (for example on
+tty5 via pressing Alt-F5).
+If you use grml-x on systems other than grml in live mode you can invoke
+it as user root but please use the '-nostart' option to avoid startup
+X server. This allows you to generate a xorg.conf file on harddisk systems
+as well as on distributions other than grml/Debian.
+*******************************************************************************
+
+[NOTE]
+Notice that you do not have to use grml-x to start X server if you already have
+a working X config file (usually the case on harddisk installations).  Just
+adjust $HOME/.xinitrc to your needs (most common is adjusting the exec line for
+choosing the according windowmanager) and then run startx to start X server.
 
 Options
 -------
@@ -148,7 +170,5 @@ link:http://grml.org/contact/[to us]!
 Author
 ------
 
-grml-x and this manual page have been written by Michael Prokop <mika@grml.org>
-and are licensed under the GPL v2 or any later version.
-
-# vim: ft=asciidoc expandtab
+This manual page and grml-x itself have been written by Michael Prokop
+<mika@grml.org> and are licensed under the GPL v2 or any later version.
