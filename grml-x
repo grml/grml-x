@@ -174,23 +174,6 @@ sort -nur | perl -ne 's/\s+/ /; s/(\d+x\d+)/"$1"/; print')
 Option for $fg[yellow]Xinerama$fg[green] found, please use xrandr inside X.org for your further configuration!
 Trying to identify monitors now..."
 
-      # Currently we only know that it works with current intel driver,
-      # so inform user about that:
-      if [[ "$MODULE" != "intel" ]] ; then
-              print "$fg[red]
-
-Warning: using a non-intel driver - trying Xinerama setup anyway.
-If it worked please contact grml developers providing information
-about your setup so we can adjust grml-x according!
-
-      -> http://grml.org/contact/
-
-Sleeping for 10 seconds now... Will continue then...
-Just press Ctrl-C to cancel operation.
-"
-#             sleep 10 # FIXME
-      fi
-
       # make sure we have information from 2 monitors:
       # - first one from 'hwinfo --monitor'      => $MONITORINFO
       # - second one from 'hwinfo --framebuffer' => $FRAMEBUFFER
@@ -215,6 +198,23 @@ Fatal: could not identify monitor - no chance to
 "
          bailout 11
       else
+         # Currently we only know that it works with current intel driver,
+         # so inform user about that:
+         if [[ "$MODULE" != "intel" ]] ; then
+            print "$fg[red]
+
+Warning: using a non-intel driver - trying Xinerama setup anyway.
+If it worked please contact grml developers providing information
+about your setup so we can adjust grml-x according!
+
+      -> http://grml.org/contact/
+
+Sleeping for 10 seconds now... Will continue then...
+Just press Ctrl-C to cancel operation.
+"
+            sleep 10
+         fi
+
          # now calculate Virtual size for use with Xinerama
          HORIZ_RES1="$(grep 'Max. Resolution:' $MONITORINFO | sed 's/    Max\. Resolution: \(.*\)x\(.*\)/\1/')"
          VERIZ_RES1="$(grep 'Max. Resolution:' $MONITORINFO | sed 's/    Max\. Resolution: \(.*\)x\(.*\)/\2/')"
