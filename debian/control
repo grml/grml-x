@@ -2,12 +2,12 @@ Source: grml-x
 Section: grml
 Priority: optional
 Maintainer: Michael Prokop <mika@grml.org>
-Build-Depends: debhelper (>= 4.0.0)
+Build-Depends: debhelper (>= 4.0.0), asciidoc, xsltproc, docbook-xsl
 Standards-Version: 3.7.2
 
 Package: grml-x
 Architecture: all
-Depends: ${shlibs:Depends}, ${misc:Depends}, xserver-xorg | xserver, hwinfo, grml-etc (>= 0.5-20), grml-etc-core (>= 0.2.46), zsh, pciutils, sudo, xbase-clients, grml-shlib
+Depends: ${shlibs:Depends}, ${misc:Depends}, xserver-xorg | xserver, hwinfo, grml-etc (>= 0.5-20), grml-etc-core (>= 0.2.46), zsh, pciutils, sudo, xbase-clients, grml-shlib, bc
 Recommends: fluxbox | x-window-manager, xterm | x-terminal-emulator, xfonts-base, xserver-xorg-input-vmmouse, xcursor-themes
 Suggests: xfonts-100dpi, xfonts-75dpi, fonts-ttf-west-european, xfonts-base-transcoded
 Conflicts: grml-scripts (<= 0.4-4)

@@ -1,10 +1,14 @@
 grml-x (0.3.28) unstable; urgency=low
 
   * Initial support for Xinemera setup using -xinerama option.
-    [Testing: issue241]
+    Added 'bc' to Depends. [Testing: issue241]
   * Support activating composite extension on cmdline using
     the -composite option. (By default it's deactivated.)
   * Remove some blank lines in generated xorg.conf.
+  * Switch from manually written nroff manpage to asciidoc
+    instead. Adjusted Build-Depends therefore (asciidoc, xsltproc,
+    docbook-xsl). The manual page is available online as well now:
+    http://grml.org/grml-x/
 
  -- Michael Prokop <mika@grml.org>  Thu, 12 Jul 2007 01:20:52 +0200
 
