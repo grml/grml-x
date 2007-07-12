@@ -737,7 +737,6 @@ EndSection
 
 # More information: http://ftp.x.org/pub/X11R7.0/doc/html/mouse.html
 ${USBMOUSEDETAIL}${PS2MOUSEDETAIL}${SERMOUSEDETAIL}${SYNMOUSEDETAIL}${EVDEV_MOUSE}
-
 Section "Monitor"
         Identifier   "Monitor0"
 #       ModelName    "Old Monitor (no DDC)"
