@@ -25,4 +25,4 @@ online:
 	scp grml-x.html grml:/var/www/grml/grml-x/index.html
 
 clean:
-	rm -rf grml-x.html grml-x.xml grml-x.1 html-stamp man-stamp
+	rm -rf grml-x.html grml-x.1 grml-x.xml html-stamp man-stamp

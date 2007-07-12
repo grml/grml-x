@@ -21,7 +21,7 @@ build-stamp:
 clean:
 	dh_testdir
 	dh_testroot
-	rm -f build-stamp html-stamp man-stamp grml-x.html grml-x.1 grml-x.xml
+	rm -f build-stamp html-stamp man-stamp
 
 	# Add here commands to clean up after the build process.
 	-$(MAKE clean)
