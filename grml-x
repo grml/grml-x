@@ -4,7 +4,7 @@
 # Authors:       grml-team (grml.org), (c) Michael Prokop <mika@grml.org>
 # Bug-Reports:   see http://grml.org/bugs/
 # License:       This file is licensed under the GPL v2.
-# Latest change: Don Jul 12 01:20:47 CEST 2007 [mika]
+# Latest change: Don Jul 12 02:53:42 CEST 2007 [mika]
 ################################################################################
 
 # debugging {{{
@@ -120,17 +120,18 @@ usage()
 Usage: $PROGRAMNAME
        $PROGRAMNAME [-options] windowmanager
 
-Examples:
+Usage examples:
   $PROGRAMNAME wmii
-  $PROGRAMNAME pekwm
   $PROGRAMNAME fluxbox
+  $PROGRAMNAME openbox
   $PROGRAMNAME -force -nostart fluxbox
   $PROGRAMNAME -nosynaptics fluxbox
   $PROGRAMNAME -nosync fluxbox
   $PROGRAMNAME -noddc wmii
-  $PROGRAMNAME -module radeon -mode 1024x768 -vsync 60 wmi
-  XINITRC=~/.xinitrc $PROGRAMNAME ion
-  $PROGRAMNAME -display 8 wmii
+  $PROGRAMNAME -xinerama -composite wmii
+  $PROGRAMNAME -module radeon -mode 1024x768 -vsync 60 openbox
+  XINITRC=~/.xinitrc $PROGRAMNAME openbox
+  $PROGRAMNAME -display 8 openbox
 
 More information on grml-x can be found in the manual page: man grml-x
 
@@ -634,7 +635,7 @@ requirements()
 {
 if ! [ -x $(which hwinfo) ] ; then
   print "$bg[black]$fg[red]${bold_color}Error: hwinfo not found in path.${reset_color}
-Note:  run 'apt-get install hwinfo' on systems running debian.
+Note:  run 'aptitude install hwinfo' on systems running debian.
 Exiting.${reset_color}"
   exit -1
 fi
@@ -912,8 +913,8 @@ Please exit screen and try to run $PROGRAMNAME again."
   get-edid | parse-edid
 
 Do you want to go the debian way of life? Run:
-  apt-get install x-window-system-core read-edid mdetect hwinfo xdebconfigurator
-  dpkg-reconfigure x-window-system-core (or xserver-xorg depending on your system)
+  aptitude install xorg read-edid mdetect hwinfo xdebconfigurator
+  dpkg-reconfigure -phigh xserver-xorg
 
 Problems with the module used for X? Try to load another one or
 fall back to module vesa:
