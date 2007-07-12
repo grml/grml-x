@@ -183,9 +183,10 @@ Trying to identify monitors now..."
 Fatal: could not identify two monitors - no chance to
        set up multihead using Xinerama - sorry. :-(
 
-Please run grml-x without the -xinerama option and contact
-grml developers if you have any further useful information.
-       => http://grml.org/bugs/
+Please run grml-x without the -xinerama option to start
+X anyway (dropping support for Xinerama of course) and
+contact grml developers if you have any further useful
+information.                  => http://grml.org/bugs/
 "
          bailout 10
       fi
