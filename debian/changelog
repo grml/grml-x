@@ -1,3 +1,10 @@
+grml-x (0.3.29) unstable; urgency=low
+
+  * Mention http://wiki.debian.org/XStrikeForce/FAQ in the xorg.conf
+    header.
+
+ -- Michael Prokop <mika@grml.org>  Tue, 17 Jul 2007 16:24:11 +0200
+
 grml-x (0.3.28) unstable; urgency=low
 
   * Initial support for Xinemera setup using -xinerama option.

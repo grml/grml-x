@@ -665,9 +665,13 @@ cat << EOX
 #   /usr/share/doc/xserver-xorg/   and
 #   http://wiki.x.org/wiki/Home    and
 #   http://ftp.x.org/pub/X11R7.0/doc/html/index.html for information on Xorg
+# 
 # Refer to the xorg.conf man page and to
 # http://ftp.x.org/pub/X11R7.0/doc/html/xorg.conf.5.html
 # for details about the format of this file.
+#
+# See http://wiki.debian.org/XStrikeForce/FAQ for information
+# regarding Xorg packages within Debian.
 #
 # If you would like this file to be automatically reconfigured by debian,
 # run the following command:
