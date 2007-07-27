@@ -1,3 +1,11 @@
+grml-x (0.3.30) unstable; urgency=low
+
+  * Some further error handling regarding Xinerama.
+    We still don't have a reliable way to find the maximum resolution
+    of an external monitor, needs some further investigation.
+
+ -- Michael Prokop <mika@grml.org>  Sat, 28 Jul 2007 01:20:54 +0200
+
 grml-x (0.3.29) unstable; urgency=low
 
   * Mention http://wiki.debian.org/XStrikeForce/FAQ in the xorg.conf

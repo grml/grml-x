@@ -220,12 +220,20 @@ Just press Ctrl-C to cancel operation.
          # now calculate Virtual size for use with Xinerama
          HORIZ_RES1="$(grep 'Max. Resolution:' $MONITORINFO | sed 's/    Max\. Resolution: \(.*\)x\(.*\)/\1/')"
          VERIZ_RES1="$(grep 'Max. Resolution:' $MONITORINFO | sed 's/    Max\. Resolution: \(.*\)x\(.*\)/\2/')"
+	 # it might happen that we don't have a Max Resolution in hwinfo output :-/
+         # fall back to a generic value then...
+         # TODO: check out how to get resolution of external monitor from console
+	 if [ -z "$HORIZ_RES1" ] ; then
+            HORIZ_RES1="1024"
+            VERIZ_RES1="768"
+         fi
 
-         HORIZ_RES2="$(echo $FRAMEBUFFER | sed 's/  Mode 0x.*: \(.*\)x.*/\1/')"
-         VERIZ_RES2="$(echo $FRAMEBUFFER | sed 's/  Mode 0x.*x\(.*\) (.*/\1/')"
+	 # get maximum of output
+         HORIZ_RES2="$(echo $FRAMEBUFFER | grep 'Mode 0x' | sed 's/  Mode 0x.*: \(.*\)x.*/\1/'| sort -u | head -1)"
+         VERIZ_RES2="$(echo $FRAMEBUFFER | grep 'Mode 0x' | sed 's/  Mode 0x.*x\(.*\) (.*/\1/' | sort -u | head -1)"
 
-         if [ -n "$HORIZ_RES1" -a -n "$VERIZ_RES1" -a -n "$HORIZ_RES2" ] ; then
-            if [ $(echo $VERIZ_RES1 - $VERIZ_RES2 | bc -l) -eq 0 ] ; then
+         if [ -n "$HORIZ_RES1" -a -n "$VERIZ_RES1" -a -n "$HORIZ_RES2" -a -n "$VERIZ_RES2" ] ; then
+            if [ "$(echo $VERIZ_RES1" - "$VERIZ_RES2 | bc -l)" -eq 0 ] ; then
             VERIZ_RESULT="$VERIZ_RES1"
             elif [ "$VERIZ_RES1" -gt "$VERIZ_RES2" ] ; then
                VERIZ_RESULT="$VERIZ_RES1"
