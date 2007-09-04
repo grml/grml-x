@@ -1,3 +1,9 @@
+grml-x (0.3.31) unstable; urgency=low
+
+  * Check for writeable /tmp before executing hardware detection.
+
+ -- Michael Prokop <mika@grml.org>  Tue,  4 Sep 2007 12:51:22 +0200
+
 grml-x (0.3.30) unstable; urgency=low
 
   * Some further error handling regarding Xinerama.
