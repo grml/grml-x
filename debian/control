@@ -4,6 +4,9 @@ Priority: optional
 Maintainer: Michael Prokop <mika@grml.org>
 Build-Depends: debhelper (>= 4.0.0), asciidoc, xsltproc, docbook-xsl
 Standards-Version: 3.7.2
+Homepage: http://hg.grml.org/grml-x/
+XS-Vcs-hg: http://hg.grml.org/grml-x/
+XS-Vcs-Browser: http://hg.grml.org/grml-x/
 
 Package: grml-x
 Architecture: all
