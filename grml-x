@@ -273,6 +273,7 @@ Just press Ctrl-C to cancel operation.
 sync()
 {
    [ -r "$MONITORINFO" ] || monitor # get monitor settings
+   [ -r "$MONITORINFO" ] || bailout 1
    vsyncval=$(awk '/Vert. Sync Range:/{print $4}' $MONITORINFO | sed 's/-/.0 - / ; s/$/.0/' | head -1)
    hsyncval=$(awk '/Hor. Sync Range:/{print $4}'  $MONITORINFO | sed 's/-/.0 - / ; s/$/.0/' | head -1)
    if [ -z $vsyncval ] ; then
@@ -590,6 +591,7 @@ EndSection"
      writehwinfo
 
      # monitor stuff
+     [ -r "$HWINFO_TMP" ] || bailout 1
      MONITOR=$(awk '/monitor.1:/{print $3}' $HWINFO_TMP)
      [[ $MONITOR != 'ddc' ]] && NODDC=yes
 
@@ -988,7 +990,7 @@ cleanup
 
 # xinitrc {{{
   if ! [ -x "$(which $WINDOWMANAGER)" ] ; then
-     print "$bg[black]$fg[red]${bold_color}Fatal: windowmanager $fg[blue]$WINDOWMANAGER$fg[red] not executable, startx won' work.${reset_color}">&2
+     print "$bg[black]$fg[red]${bold_color}Fatal: windowmanager $fg[blue]$WINDOWMANAGER$fg[red] not executable, startx will not work.${reset_color}">&2
      bailout
   fi
   if [ -w "$XINITRC" ] ; then
