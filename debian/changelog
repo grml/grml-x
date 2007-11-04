@@ -1,7 +1,7 @@
 grml-x (0.3.33) unstable; urgency=low
 
   * Replace /usr/X11R6/lib/ with /usr/lib/xorg in the comments.
-    Thanks for the patch, Alexander Steinböck!
+    Thanks for the patch, Alexander Steinböck! [Closes: issue325]
 
  -- Michael Prokop <mika@grml.org>  Sun, 04 Nov 2007 23:40:37 +0100
 
