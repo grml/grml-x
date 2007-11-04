@@ -49,7 +49,7 @@ Section "Files"
         FontPath     "/var/lib/defoma/x-ttcidfont-conf.d/dirs/TrueType"
 EndSection
 
-# Modules - see /usr/X11R6/lib/modules/fonts and /usr/X11R6/lib/modules/extensions
+# Modules - see /usr/lib/xorg/modules/fonts and /usr/lib/xorg/modules/extensions
 Section "Module"
         Load  "dbe"       # double buffer extension
         Load  "dri"       # direct rendering
