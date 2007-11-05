@@ -1,3 +1,9 @@
+grml-x (0.3.34) unstable; urgency=low
+
+  * Add awesome, larswm and xmonad to zsh completion.
+
+ -- Michael Prokop <mika@grml.org>  Mon, 05 Nov 2007 23:28:42 +0100
+
 grml-x (0.3.33) unstable; urgency=low
 
   * Replace /usr/X11R6/lib/ with /usr/lib/xorg in the comments.
