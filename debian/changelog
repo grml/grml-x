@@ -1,3 +1,9 @@
+grml-x (0.3.35) unstable; urgency=low
+
+  * Load "xtrap" extension. 
+
+ -- Michael Prokop <mika@grml.org>  Wed, 14 Nov 2007 12:41:28 +0100
+
 grml-x (0.3.34) unstable; urgency=low
 
   * Add awesome, larswm and xmonad to zsh completion.

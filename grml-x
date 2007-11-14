@@ -730,6 +730,7 @@ Section "Module"
         Load  "extmod"    # some commonly used server extensions (e.g. shape extension)
         Load  "record"    # recording extension
         Load  "evdev"     # generic input handling driver on Linux
+        Load  "xtrap"     # X Trap extension
         # Load  "vbe"       # Vesa BIOS Extension
         # Load  "i2c"       # I2C bus
         # Load  "int10"     # initialize graphics cards via int10 call to the BIOS
