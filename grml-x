@@ -329,7 +329,7 @@ EndSection
     if grep -q 'Device:.*ALPS' "$MOUSEINFO" ; then
      if [[ "$SYNAPTICS" == "yes" ]] ; then # check for '-nosynaptics'-option
       MOUSEDRIVER='synaptics'
-      SYNMOUSE='InputDevice    "Synaptics"  "AlwaysCore"'
+      SYNMOUSE='# InputDevice    "Synaptics"  "AlwaysCore"'
       SYNMOUSEDETAIL="
 Section \"InputDevice\"
   Driver        \"synaptics\"
