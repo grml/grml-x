@@ -1,6 +1,6 @@
 grml-x (0.3.35) unstable; urgency=low
 
-  * Deactivate 'InputDevice    "Synaptics"  "AlwaysCore"' line by default.
+  * Deactivate "AlwaysCore" from Synaptics devive by default.
     This should fix a pending bug in current Xorg which avoids a working
     Synaptics device.
   * Load "xtrap" extension. 
