@@ -1,3 +1,10 @@
+grml-x (0.3.37) unstable; urgency=low
+
+  * Replace EmulateMiddleButtonTime with EmulateMidButtonTime.
+    Thanks, Jerome Potts!
+
+ -- Michael Prokop <mika@grml.org>  Sun, 18 Nov 2007 23:51:43 +0100
+
 grml-x (0.3.36) unstable; urgency=low
 
   * Disable vmmouse in xorg.conf.vmware for now as it's broken
