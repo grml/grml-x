@@ -19,7 +19,7 @@ man-stamp: grml-x.txt
 	cp grml-x.1 grml-x.1.tmp
 	uniq grml-x.1.tmp > grml-x.1
 	# ugly hack to avoid '.sp' at the end of a sentence or paragraph:
-	sed -i 's/\.sp$//' grml-x.1
+	sed -i 's/\.sp//' grml-x.1
 	rm grml-x.1.tmp
 	touch man-stamp
 
