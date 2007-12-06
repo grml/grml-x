@@ -4,6 +4,7 @@ grml-x (0.3.37) unstable; urgency=low
     Thanks, Jerome Potts!
   * Make sure /etc/X11/X is not a symlink to /bin/true (broken
     Debian package/upgrade).
+  * Fix manpage handling of xsltproc.
 
  -- Michael Prokop <mika@grml.org>  Sun, 18 Nov 2007 23:51:43 +0100
 

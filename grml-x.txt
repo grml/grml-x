@@ -81,7 +81,7 @@ XOPTS='...'::
 -module <name>::
         Use <name> as module for X server.
 
--noddc:
+-noddc::
         Do not use ddc probing but use static entries for resolution modes.
 
 -nohsync::
