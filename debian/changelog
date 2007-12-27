@@ -1,6 +1,7 @@
 grml-x (0.4.0) unstable; urgency=low
 
   * Provide /etc/X11/xorg.conf.virtualbox
+  * Bump Standard-Version to 3.7.3 (no further changes).
 
  -- Michael Prokop <mika@grml.org>  Thu, 27 Dec 2007 23:43:58 +0100
 
