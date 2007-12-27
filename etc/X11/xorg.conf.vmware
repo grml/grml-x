@@ -87,7 +87,7 @@ EndSection
 #         Option      "XkbRules"   "xfree86"
 #         Option      "XkbRules"   "xorg"
 #         Option      "XkbModel"   "pc105"
-#         Option      "XkbLayout"  "us,us"
+#         Option      "XkbLayout"  "us"
 #         Option      "XkbVariant" "nodeadkeys"
 #         # Option      "XkbOptions" "ctrl:swapcaps,grp:alt_shift_toggle,grp_led:scroll,compose:menu"
 # EndSection
