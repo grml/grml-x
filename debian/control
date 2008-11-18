@@ -10,8 +10,8 @@ Vcs-Browser: http://git.grml.org/?p=grml-x.git
 
 Package: grml-x
 Architecture: all
-Depends: ${shlibs:Depends}, ${misc:Depends}, xserver-xorg | xserver, hwinfo, grml-etc (>= 0.5-20), grml-etc-core (>= 0.2.46), zsh, pciutils, sudo, xbase-clients, grml-shlib, bc
-Recommends: fluxbox | x-window-manager, xterm | x-terminal-emulator, xfonts-base, xserver-xorg-input-vmmouse, xcursor-themes
+Depends: ${shlibs:Depends}, ${misc:Depends}, xserver-xorg | xserver, hwinfo, grml-etc (>= 0.5-20), grml-etc-core (>= 0.2.46), zsh, pciutils, sudo, grml-shlib, bc, x11-xkb-utils, x11-xserver-utils, xauth, xinit
+Recommends: fluxbox | x-window-manager, xterm | x-terminal-emulator, xfonts-base, xserver-xorg-input-vmmouse, xcursor-themes, x11-utils
 Suggests: xfonts-100dpi, xfonts-75dpi, fonts-ttf-west-european, xfonts-base-transcoded
 Conflicts: grml-scripts (<= 0.4-4)
 Description: wrapper for startx for running X Window System

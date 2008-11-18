@@ -4,8 +4,11 @@ grml-x (0.4.1) unstable; urgency=low
     Thanks to Thomas Lehmann for the idea.
   * Update VCS headers.
   * Bump Standard-Version to 3.8.0 (no further changes).
+  * Replace deprecated xbase-clients in Depends with x11-xkb-utils,
+    x11-xserver-utils, xauth and xinit.
+  * Add x11-utils to Recommends.
 
- -- Michael Prokop <mika@grml.org>  Wed, 19 Nov 2008 00:05:27 +0100
+ -- Michael Prokop <mika@grml.org>  Wed, 19 Nov 2008 00:11:02 +0100
 
 grml-x (0.4.0) unstable; urgency=low
 
