@@ -4,7 +4,6 @@
 # Authors:       grml-team (grml.org), (c) Michael Prokop <mika@grml.org>
 # Bug-Reports:   see http://grml.org/bugs/
 # License:       This file is licensed under the GPL v2.
-# Latest change: Die Sep 04 01:44:19 CEST 2007 [mika]
 ################################################################################
 
 # make sure /tmp is writeable {{{
@@ -911,14 +910,15 @@ function runit
     if [ -z "$DISPLAY" ] ; then
       print "$bold_color$fg[green]Now trying to run startx.$reset_color"
       startx $XINITRC -- $XOPTS
+      return 1
     else
       print "$bold_color$fg[green]Now trying to run startx on display $DISPLAY.$reset_color"
       startx $XINITRC -- :$DISPLAY $XOPTS
+      return 1
     fi
   else
     print "$bold_color$fg[blue]Not running startx as requested via option.$reset_color"
   fi
-  return 1
 }
 # }}}
 
