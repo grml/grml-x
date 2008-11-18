@@ -3,10 +3,10 @@ Section: grml
 Priority: optional
 Maintainer: Michael Prokop <mika@grml.org>
 Build-Depends: debhelper (>= 4.0.0), asciidoc, xsltproc, docbook-xsl
-Standards-Version: 3.7.3
-Homepage: http://hg.grml.org/grml-x/
-XS-Vcs-hg: http://hg.grml.org/grml-x/
-XS-Vcs-Browser: http://hg.grml.org/grml-x/
+Standards-Version: 3.8.0
+Homepage: http://git.grml.org/?p=grml-x.git
+Vcs-git: git://git.grml.org/grml-x.git
+Vcs-Browser: http://git.grml.org/?p=grml-x.git
 
 Package: grml-x
 Architecture: all

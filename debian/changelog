@@ -2,6 +2,8 @@ grml-x (0.4.1) unstable; urgency=low
 
   * Do not display usage information when using the -nostart option.
     Thanks to Thomas Lehmann for the idea.
+  * Update VCS headers.
+  * Bump Standard-Version to 3.8.0 (no further changes).
 
  -- Michael Prokop <mika@grml.org>  Wed, 19 Nov 2008 00:05:27 +0100
 
