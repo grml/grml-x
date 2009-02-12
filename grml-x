@@ -6,13 +6,6 @@
 # License:       This file is licensed under the GPL v2.
 ################################################################################
 
-# make sure /tmp is writeable {{{
-  if ! [ -w /tmp ] ; then
-     echo 'Fatal: /tmp is not writeable. Can not resume therefore, sorry.' >&2
-     exit 1
-  fi
-# }}}
-
 # debugging {{{
 # usage: DEBUG=1 grml-x ..... 2>/tmp/grml-x-debug.log
   if [[ $DEBUG -gt 0 ]]; then
@@ -46,9 +39,14 @@
   [ -n "$XINITRC" ] || XINITRC="$HOME/.xinitrc"
 
   # temporary files
-  HWINFO_TMP="/tmp/hwinfo.$$"
-  MONITORINFO="/tmp/monitorinfo.$$"
-  MOUSEINFO="/tmp/mouse.$$"
+  HWINFO_TMP="$(mktemp)"
+  MONITORINFO="$(mktemp)"
+  MOUSEINFO="$(mktemp)"
+
+  if [ -z "$HWINFO_TMP" ] ; then
+     echo "Fatal: could not create temporary file. Exiting.">&2
+     bailout 1
+  fi
 
   if [ -r /etc/sysconfig/keyboard ] ; then
     source /etc/sysconfig/keyboard
@@ -127,17 +125,16 @@ Usage: $PROGRAMNAME
        $PROGRAMNAME [-options] windowmanager
 
 Usage examples:
-  $PROGRAMNAME wmii
   $PROGRAMNAME fluxbox
-  $PROGRAMNAME openbox
+  $PROGRAMNAME fluxbox
   $PROGRAMNAME -force -nostart fluxbox
   $PROGRAMNAME -nosynaptics fluxbox
   $PROGRAMNAME -nosync fluxbox
-  $PROGRAMNAME -noddc wmii
-  $PROGRAMNAME -xinerama -composite wmii
-  $PROGRAMNAME -module radeon -mode 1024x768 -vsync 60 openbox
-  XINITRC=~/.xinitrc $PROGRAMNAME openbox
-  $PROGRAMNAME -display 8 openbox
+  $PROGRAMNAME -noddc fluxbox
+  $PROGRAMNAME -xinerama -composite fluxbox
+  $PROGRAMNAME -module radeon -mode 1024x768 -vsync 60 fluxbox
+  XINITRC=~/.xinitrc $PROGRAMNAME fluxbox
+  $PROGRAMNAME -display 8 fluxbox
 
 More information on grml-x can be found in the manual page: man grml-x
 
@@ -681,7 +678,7 @@ cat << EOX
 #   /usr/share/doc/xserver-xorg/   and
 #   http://wiki.x.org/wiki/Home    and
 #   http://ftp.x.org/pub/X11R7.0/doc/html/index.html for information on Xorg
-# 
+#
 # Refer to the xorg.conf man page and to
 # http://ftp.x.org/pub/X11R7.0/doc/html/xorg.conf.5.html
 # for details about the format of this file.
@@ -852,7 +849,7 @@ EOX
 
 # writeit {{{
 writeit() {
-    XCONFTMP="/tmp/xconfig.$$"
+    XCONFTMP="$(mktemp)"
     xconfig > $XCONFTMP
     # we do not want to have two CorePointers, deactivate one therefore
     if grep -Eq '^[[:space:]]+InputDevice[ ]+"USB Mouse"[ ]+"CorePointer"' $XCONFTMP ; then

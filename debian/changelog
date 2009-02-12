@@ -4,11 +4,14 @@ grml-x (0.4.2) unstable; urgency=low
     - use double brackets for the test command
     - make sure the right usage text gets displayed
     - support fallback options
-
+    - improve description of force option
     Thanks to ft and z3ttacht for their work! [Closes: issue398]
   * Use Build-Depends-Indep in debian/control to make lintian happy.
+  * Consequently use mktemp for handling tmp files.
+  * Use fluxbox for all usage examples in grml-x itself (on grml-medium
+    we ship fluxbox only and people might be confused otherwise).
 
- -- Michael Prokop <mika@grml.org>  Thu, 12 Feb 2009 18:04:15 +0100
+ -- Michael Prokop <mika@grml.org>  Thu, 12 Feb 2009 18:10:53 +0100
 
 grml-x (0.4.1) unstable; urgency=low
 
