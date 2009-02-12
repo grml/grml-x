@@ -22,7 +22,7 @@ arguments=(
   '-composite[enable composite extension (disabled by default)]'
   '-display[display for xserver]:display:(7 8)'
   '-fallback[use xorg.conf.example to get X running when it won'\''t start otherwise]'
-  '-force[force creation of xconfig file]'
+  '-force[force (re-)creation of xorg.conf file]'
   '-help[display help]:'
   '-genmouse[generate generic entry for mouse using /dev/input/mice and auto protocol]'
   '-hsync[horizontal sync frequencies (<number>)]:hsync frequencies:(28 `seq 30 5 95` 96)'
