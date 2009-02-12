@@ -6,8 +6,9 @@ grml-x (0.4.2) unstable; urgency=low
     - support fallback options
 
     Thanks to ft and z3ttacht for their work! [Closes: issue398]
+  * Use Build-Depends-Indep in debian/control to make lintian happy.
 
- -- Michael Prokop <mika@grml.org>  Thu, 12 Feb 2009 17:56:36 +0100
+ -- Michael Prokop <mika@grml.org>  Thu, 12 Feb 2009 18:04:15 +0100
 
 grml-x (0.4.1) unstable; urgency=low
 
