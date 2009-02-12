@@ -39,9 +39,11 @@
   [ -n "$XINITRC" ] || XINITRC="$HOME/.xinitrc"
 
   # temporary files
-  HWINFO_TMP="$(mktemp)"
-  MONITORINFO="$(mktemp)"
-  MOUSEINFO="$(mktemp)"
+  # notice: we need the unsafe option, otherwise users other than root
+  # can not write to HWINFO_TMP, but we don't want to run hwinfo as root
+  HWINFO_TMP="$(mktemp -u)" || exit 1
+  MONITORINFO="$(mktemp)"   || exit 1
+  MOUSEINFO="$(mktemp)"     || exit 1
 
   if [ -z "$HWINFO_TMP" ] ; then
      echo "Fatal: could not create temporary file. Exiting.">&2
