@@ -60,6 +60,10 @@ XOPTS='...'::
 -display <number>::
         Specify display for use with Xserver.
 
+-fallback::
+        Copy /etc/X11/xorg.conf.example to /etc/X11/xorg.conf to get X
+        running when it won't start otherwise.
+
 -force::
         Force creation of xorg.conf file. This option is also assumed when another
         option which needs to be write values to the X config file is provided. The old

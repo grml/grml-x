@@ -1,3 +1,14 @@
+grml-x (0.4.2) unstable; urgency=low
+
+  * Improve zsh completion:
+    - use double brackets for the test command
+    - make sure the right usage text gets displayed
+    - support fallback options
+
+    Thanks to ft and z3ttacht for their work! [Closes: issue398]
+
+ -- Michael Prokop <mika@grml.org>  Thu, 12 Feb 2009 17:56:36 +0100
+
 grml-x (0.4.1) unstable; urgency=low
 
   * Do not display usage information when using the -nostart option.
