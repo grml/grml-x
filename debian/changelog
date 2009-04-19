@@ -1,3 +1,10 @@
+grml-x (0.4.3) unstable; urgency=low
+
+  * Use Option "DontZap" "false" by default, now as DontZap has become
+    a default option. See https://wiki.ubuntu.com/X/Config/DontZap
+
+ -- Michael Prokop <mika@grml.org>  Sun, 19 Apr 2009 23:45:20 +0200
+
 grml-x (0.4.2) unstable; urgency=low
 
   * Improve zsh completion:

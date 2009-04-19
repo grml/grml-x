@@ -704,7 +704,7 @@ EndSection
 Section "ServerFlags"
         Option "AllowMouseOpenFail"  "true"  # allows the server to start up even if the mouse does not work
         Option "DontVTSwitch"        "false" # allow switching between virtual terminal
-        # Option "DontZap"             "true"  # disable <Crtl><Alt><BS> (server abort)
+        Option "DontZap"             "false" # enable <Crtl><Alt><BS> (server abort)
         # Option "DontZoom"            "true"  # disable <Crtl><Alt><KP_+>/<KP_-> (resolution switching)
 EndSection
 
