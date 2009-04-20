@@ -25,6 +25,7 @@ Section "ServerLayout"
         # InputDevice    "PS/2 Mouse"    "CorePointer"
         # No synaptics/alps touchpad present.
         # No serial mouse detected.
+        Option "AutoAddDevices" "off" # do not depend on running dbus/hal
 EndSection
 
 Section "ServerFlags"

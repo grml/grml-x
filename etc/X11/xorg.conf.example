@@ -21,6 +21,7 @@ Section "ServerLayout"
         InputDevice    "Keyboard0"  "CoreKeyboard"
         InputDevice    "USB Mouse"  "CorePointer"
         # InputDevice    "PS/2 Mouse" "CorePointer"
+        Option "AutoAddDevices" "off" # do not depend on running dbus/hal
 EndSection
 
 Section "ServerFlags"

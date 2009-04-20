@@ -698,6 +698,7 @@ Section "ServerLayout"
         Screen      0  "Screen0" 0 0
         # InputDevice    "Keyboard0"     "CoreKeyboard"
         # InputDevice    "Generic Mouse" "CorePointer"
+        Option "AutoAddDevices" "off" # do not depend on running dbus/hal
 $MOUSE
 EndSection
 
