@@ -31,12 +31,12 @@ install: build
 	dh_testdir
 	dh_testroot
 	dh_clean -k
-	dh_installdirs etc/init.d usr/bin
+	dh_installdirs etc/init.d usr/bin usr/share/grml
 
 	# Add here commands to install the package into debian/grml-x.
-	install -m 755 grml-x     debian/grml-x/usr/bin/grml-x
-	cp -r etc/X11/ debian/grml-x/etc/
-	cp -r etc/zsh/ debian/grml-x/etc/
+	install -m 755 grml-x debian/grml-x/usr/bin/grml-x
+	cp -r etc/X11/        debian/grml-x/etc/
+	cp -r usr_share_grml/ debian/grml-x/usr/share/grml/
 
 # Build architecture-dependent files here.
 binary-arch: build install

@@ -1,3 +1,11 @@
+grml-x (0.4.5) unstable; urgency=low
+
+  * Move zsh completion file to /usr/share/grml/zsh/completion/grml/_grml-x
+    as introduced by grml-etc-core 0.3.73.
+  * Add xfce4-session to zsh completion.
+
+ -- Michael Prokop <mika@grml.org>  Wed, 22 Jul 2009 22:46:56 +0200
+
 grml-x (0.4.4) unstable; urgency=low
 
   * Add Option "AutoAddDevices" "off", as we do not want to depend on

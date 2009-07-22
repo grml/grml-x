@@ -1,5 +1,5 @@
 #compdef grml-x
-# Filename:      /etc/zsh/completion.d/grml-x
+# Filename:      /usr/share/grml/zsh/completion/grml/_grml-x
 # Purpose:       completion for command grml-x for zsh (z shell)
 # Authors:       grml-team (grml.org), (c) Michael Prokop <mika@grml.org>
 # Bug-Reports:   see http://grml.org/bugs/
@@ -14,7 +14,7 @@ wms=()
 for wm in awesome blackbox dwm evilwm fluxbox fvwm fvwm2 fvwm-crystal      \
           gnome-session gnomesession icewm ion2 ion3 jwm larswm openbox    \
 	  particleman pekwm pwm3 ratpoison startkde twm w9wm windowlab wmi \
-	  wmii wm-ng xfce4 xfwm4 xmonad ; do
+	  wmii wm-ng xfce4 xfce4-session xfwm4 xmonad ; do
     [[ -x /usr/bin/$wm ]] && wms+=$wm
 done
 
