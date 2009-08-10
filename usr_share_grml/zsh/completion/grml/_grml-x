@@ -14,7 +14,8 @@ wms=()
 for wm in awesome blackbox dwm evilwm fluxbox fvwm fvwm2 fvwm-crystal     \
           gnome-session gnomesession icewm ion2 ion3 jwm larswm lxsession \
 	  openbox particleman pekwm pwm3 ratpoison startkde twm w9wm      \
-	  windowlab wmi wmii wm-ng xfce4 xfce4-session xfwm4 xmonad ; do
+	  windowlab wmi wmii wm-ng xfce4 xfce4-session xfwm4 xmonad       \
+	  x-window-manager ; do
     [[ -x /usr/bin/$wm ]] && wms+=$wm
 done
 

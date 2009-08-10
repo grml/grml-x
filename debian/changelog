@@ -1,3 +1,9 @@
+grml-x (0.4.6) unstable; urgency=low
+
+  * Add x-window-manager to zsh completion. [Closes: issue716]
+
+ -- Michael Prokop <mika@grml.org>  Mon, 10 Aug 2009 16:04:02 +0200
+
 grml-x (0.4.5) unstable; urgency=low
 
   * Move zsh completion file to /usr/share/grml/zsh/completion/grml/_grml-x
