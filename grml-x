@@ -724,16 +724,16 @@ Section "Module"
         Load  "dbe"       # double buffer extension
         Load  "dri"       # direct rendering
         Load  "glx"       # 3D layer / GLX extension
-        Load  "type1"     # type1 font module
-        Load  "freetype"  # freetype fonts rendering
         Load  "extmod"    # some commonly used server extensions (e.g. shape extension)
         Load  "record"    # recording extension
         Load  "evdev"     # generic input handling driver on Linux
         Load  "xtrap"     # X Trap extension
-        # Load  "vbe"       # Vesa BIOS Extension
+        # Load  "freetype"  # freetype fonts rendering
         # Load  "i2c"       # I2C bus
         # Load  "int10"     # initialize graphics cards via int10 call to the BIOS
+        # Load  "type1"     # type1 font module
         # Load  "v4l"       # Video for Linux
+        # Load  "vbe"       # Vesa BIOS Extension
         ## Deprecated/unneeded modules with Xorg >=7.0:
         # Load  "speedo"    # font module (does not exist anymore)
         # Load  "ddc"       # ddc probing of monitor (automatically loaded)

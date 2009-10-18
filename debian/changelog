@@ -1,3 +1,13 @@
+grml-x (0.4.7) unstable; urgency=low
+
+  * xorg.conf.virtualbox: deactivate all Options from "Generic Mouse"
+    so mouse clicking works in recent X.org versions again.
+    [Closes: issue740]
+  * Deactivate type1 and freetype module in all xorg.conf files (they
+    aren't present on nowadays systems).
+
+ -- Michael Prokop <mika@grml.org>  Sun, 18 Oct 2009 15:19:00 +0200
+
 grml-x (0.4.6) unstable; urgency=low
 
   * Add x-window-manager to zsh completion. [Closes: issue716]
