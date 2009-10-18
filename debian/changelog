@@ -5,8 +5,9 @@ grml-x (0.4.7) unstable; urgency=low
     [Closes: issue740]
   * Deactivate type1 and freetype module in all xorg.conf files (they
     aren't present on nowadays systems).
+  * Bump Standards-Version to 3.8.3 (no further changes).
 
- -- Michael Prokop <mika@grml.org>  Sun, 18 Oct 2009 15:19:00 +0200
+ -- Michael Prokop <mika@grml.org>  Sun, 18 Oct 2009 15:21:54 +0200
 
 grml-x (0.4.6) unstable; urgency=low
 
