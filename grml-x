@@ -6,6 +6,9 @@
 # License:       This file is licensed under the GPL v2.
 ################################################################################
 
+
+. /usr/lib/grml/core.sh
+
 # debugging {{{
 # usage: DEBUG=1 grml-x ..... 2>/tmp/grml-x-debug.log
   if [[ $DEBUG -gt 0 ]]; then
@@ -15,7 +18,7 @@
 
 # functions and color {{{
   # use colors only if not booted with nocolor bootoption
-  if ! grep -q nocolor /proc/cmdline ; then
+  if ! checkbootparam nocolor ; then
      autoload colors ; colors
      [ -r /etc/grml_colors ] && . /etc/grml_colors
   fi
