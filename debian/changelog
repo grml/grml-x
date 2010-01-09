@@ -1,3 +1,9 @@
+grml-x (0.4.8) unstable; urgency=low
+
+  * Add xserver-xorg-input-all + xserver-xorg-video-all to Recommends.
+
+ -- Michael Prokop <mika@grml.org>  Sat, 09 Jan 2010 02:48:23 +0100
+
 grml-x (0.4.7) unstable; urgency=low
 
   * xorg.conf.virtualbox: deactivate all Options from "Generic Mouse"
