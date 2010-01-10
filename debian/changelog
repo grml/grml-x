@@ -1,3 +1,9 @@
+grml-x (0.4.9) unstable; urgency=low
+
+  * Add xserver-xorg-input-kbd to Recommends.
+
+ -- Michael Prokop <mika@grml.org>  Sun, 10 Jan 2010 21:43:43 +0100
+
 grml-x (0.4.8) unstable; urgency=low
 
   * Add xserver-xorg-input-all + xserver-xorg-video-all to Recommends.
