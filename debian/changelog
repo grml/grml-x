@@ -2,8 +2,9 @@ grml-x (0.5.0) unstable; urgency=low
 
   * Use startlxde instead of lxsession for zsh completion.
     (See #570083 for details)
+  * Bump Standards-Version to 3.8.4 (no further changes).
 
- -- Michael Prokop <mika@grml.org>  Wed, 17 Feb 2010 02:35:11 +0100
+ -- Michael Prokop <mika@grml.org>  Wed, 17 Feb 2010 02:39:26 +0100
 
 grml-x (0.4.9) unstable; urgency=low
 
