@@ -1,3 +1,10 @@
+grml-x (0.5.0) unstable; urgency=low
+
+  * Use startlxde instead of lxsession for zsh completion.
+    (See #570083 for details)
+
+ -- Michael Prokop <mika@grml.org>  Wed, 17 Feb 2010 02:35:11 +0100
+
 grml-x (0.4.9) unstable; urgency=low
 
   * Add xserver-xorg-input-kbd to Recommends.
