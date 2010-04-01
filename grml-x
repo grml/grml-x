@@ -128,7 +128,6 @@ Usage: $PROGRAMNAME
 
 Usage examples:
   $PROGRAMNAME fluxbox
-  $PROGRAMNAME fluxbox
   $PROGRAMNAME -force -nostart fluxbox
   $PROGRAMNAME -nosynaptics fluxbox
   $PROGRAMNAME -nosync fluxbox
@@ -139,9 +138,6 @@ Usage examples:
   $PROGRAMNAME -display 8 fluxbox
 
 More information on grml-x can be found in the manual page: man grml-x
-
-Report bugs, send wishes and feedback to the grml team:
-http://grml.org/bugs/ - contact (at) grml.org
 "
   print "${reset_color}"
   exit 2
