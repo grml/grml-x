@@ -12,7 +12,7 @@ local -a wms
 wms=()
 
 for wm in awesome blackbox dwm evilwm fluxbox fvwm fvwm2 fvwm-crystal \
-          gnome-session gnomesession icewm ion2 ion3 jwm larswm       \
+          gnome-session gnomesession i3 icewm ion2 ion3 jwm larswm    \
 	  openbox particleman pekwm pwm3 ratpoison startkde startlxde \
 	  twm w9wm windowlab wmi wmii wm-ng xfce4 xfce4-session xfwm4 \
 	  xmonad x-window-manager ; do
