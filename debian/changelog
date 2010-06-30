@@ -1,3 +1,13 @@
+grml-x (0.5.2) unstable; urgency=low
+
+  [ Michael Stapelberg ]
+  * [7800fec] Add i3 to window managers.
+
+  [ Michael Prokop ]
+  * [c7c4d1d] Bump Standard-Version to 3.9.0.
+
+ -- Michael Prokop <mika@grml.org>  Wed, 30 Jun 2010 13:30:17 +0200
+
 grml-x (0.5.1) unstable; urgency=low
 
   * Drop duplicated fluxbox command line in usage examples
