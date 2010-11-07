@@ -4,9 +4,9 @@ doc: doc_man doc_html
 
 doc_html: html-stamp
 
-html-stamp: grml-x-legacy.html
+html-stamp: grml-x.html grml-x-legacy.html
 
-doc_man: grml-x-legacy.1
+doc_man: grml-x.1 grml-x-legacy.1
 
 %.1: %.txt
 	asciidoc -d manpage -b docbook $<
@@ -26,7 +26,8 @@ doc_man: grml-x-legacy.1
 	touch html-stamp
 
 online: doc
-	scp grml-x-legacy.html grml:/var/www/grml/grml-x/index.html
+	scp grml-x.html grml:/var/www/grml/grml-x/index.html
 
 clean:
 	rm -rf grml-x-legacy.html grml-x-legacy.1 grml-x-legacy.xml html-stamp man-stamp
+	rm -rf grml-x.html grml-x.1 grml-x.xml

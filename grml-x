@@ -1,0 +1,189 @@
+#!/bin/zsh
+# Filename:      grml-x
+# Purpose:       wrapper for startx on grml [providing new xconfiguration tool]
+# Authors:       grml-team (grml.org), (c) Michael Prokop <mika@grml.org>
+# Bug-Reports:   see http://grml.org/bugs/
+# License:       This file is licensed under the GPL v2.
+################################################################################
+
+# debugging {{{
+# usage: DEBUG=1 grml-x ..... 2>/tmp/grml-x-debug.log
+  if [[ $DEBUG -gt 0 ]]; then
+      setopt xtrace
+  fi
+# }}}
+
+# functions and color {{{
+  # use colors only if not booted with nocolor bootoption
+  if ! grep -q nocolor /proc/cmdline ; then
+     autoload colors ; colors
+     [ -r /etc/grml_colors ] && . /etc/grml_colors
+  fi
+
+  # some functions like getBootParam
+  if [ -r /etc/grml/script-functions -a -r /etc/grml/sh-lib ] ; then
+     source /etc/grml/script-functions
+     source /etc/grml/sh-lib
+  else
+    echo 'Error: sourcing function files failed. Exiting.'
+    exit 1
+  fi
+
+  check4root &>/dev/null && ROOT='1' || ROOT=''
+# }}}
+
+# set variables  {{{
+  PROGRAMNAME=${0##*/}
+  DATE=$(date)
+  [ -n "$XINITRC" ] || XINITRC="$HOME/.xinitrc"
+# }}}
+
+# make sure we don't leave any temp files {{{
+bailout() {
+  [ -n "$1" ] && EXIT="$1" || EXIT="1"
+  print "$bg[black]$fg[red]${bold_color}Exiting...${reset_color}">&2
+  exit "$EXIT"
+}
+
+trap bailout 1 2 3 15
+# }}}
+
+# warn if running as user root {{{
+  if [ -n "$ROOT" ] ; then
+        print "$bg[black]$fg[red]${bold_color}E: Refusing to run as root, please start \"sudo -u grml grml-x $@\" instead${reset_color}"
+        print ''
+	exit 2
+  fi
+  fstabuser=$(grep ':x:1000:' /etc/passwd)
+  fstabuser=${fstabuser%%[:]*}
+# }}}
+
+# usage information {{{
+usage()
+{
+  if [[ $1 != '' ]] ; then echo 1>&2 "\n$1" ; fi
+  print "$bg[black]$fg[red]$bold_color"
+  print 1>&2 "
+Usage: $PROGRAMNAME
+       $PROGRAMNAME windowmanager
+
+Usage examples:
+  $PROGRAMNAME fluxbox
+  XINITRC=~/.xinitrc $PROGRAMNAME fluxbox
+  $PROGRAMNAME -display 8 fluxbox
+
+More information on grml-x can be found in the manual page: man grml-x
+"
+  print "${reset_color}"
+  exit 2
+}
+# }}}
+
+# runit {{{
+function runit
+{
+  if [ "$(readlink /etc/X11/X)" = /bin/true ] ; then
+     print "$bold_color$fg[red]Fatal: /etc/X11/X is a symlink to /bin/true."
+     print "Fix it via running 'ln -sf /usr/bin/Xorg /etc/X11/X'"
+     exit 10
+  fi
+  if [ -z "$NOSTART" ] ; then
+    print "$reset_color"
+    if [ -x /etc/init.d/xorg-common ] ; then
+      sudo /etc/init.d/xorg-common start
+    else
+      if [ -x /etc/init.d/xfree86-common ] ; then
+        sudo /etc/init.d/xfree86-common start
+      fi
+    fi
+    print ""
+    if [ -z "$DISPLAY" ] ; then
+      print "$bold_color$fg[green]Now trying to run startx.$reset_color"
+      startx $XINITRC -- $XOPTS
+      return 1
+    else
+      print "$bold_color$fg[green]Now trying to run startx on display $DISPLAY.$reset_color"
+      startx $XINITRC -- :$DISPLAY $XOPTS
+      return 1
+    fi
+  else
+    print "$bold_color$fg[blue]Not running startx as requested via option.$reset_color"
+  fi
+}
+# }}}
+
+# failed {{{
+function failed
+{
+  print "$fg[red]"
+  if [ -z "$ROOT" ] ; then
+    if [[ $(tty) == /dev/pts/* ]] ; then
+      print "It seems you are running $PROGRAMNAME from inside GNU screen.
+Notice that this might fail if running as user grml!
+Please exit screen and try to run $PROGRAMNAME again."
+    fi
+  fi
+  print "Problems with the module used for X? Try to use grml-x-legacy:
+  $PROGRAMNAME-legacy -module radeon ...
+  $PROGRAMNAME-legacy -module vesa  ...
+
+Do you want to deactivate a present synaptics touchpad? Run:
+  $PROGRAMNAME-legacy -nosynaptics ...
+
+Your monitor is very old and/or does not support DDC-probing?
+  $PROGRAMNAME-legacy -noddc ...
+
+Do you want to create a x configuration file but do not start X?
+  $PROGRAMNAME-legacy -nostart ...
+
+Monitor frequency too high or too low? Just specify hsync/vsync manually:
+  $PROGRAMNAME-legacy -hsync 30-65 ...
+  $PROGRAMNAME-legacy -hsync 30-65 -vsync 50-60 ...
+
+Want to adjust the resolution? Use the mode-switch:
+  $PROGRAMNAME-legacy -mode 1024x768 ...
+  $PROGRAMNAME-legacy -mode '1280x1024 1024x768' ...
+
+Problems? Use vesa with resolution 1024x768:
+  $PROGRAMNAME-legacy -module vesa -mode 1024x768 ...
+
+Still problems with X? Use the fallback option:
+  $PROGRAMNAME-legacy -fallback ...
+
+To adjust resolution while running X execute:
+  xrandr -s '1024x768'
+
+More information on grml-x can be found in the manual page: man grml-x
+
+Report bugs, send wishes and feedback to the grml team:
+http://grml.org/bugs/ - contact (at) grml.org
+"
+print -n "$reset_color"
+}
+# }}}
+
+# parameter handling {{{
+if [ "$#" -ne 1 ] ; then
+	usage
+fi
+WINDOWMANAGER="$1"
+# }}}
+
+
+# xinitrc {{{
+if [ -n "$WINDOWMANAGER" ] ; then
+  if ! [ -x "$(which $WINDOWMANAGER)" ] ; then
+    print "$bg[black]$fg[red]${bold_color}Fatal: windowmanager $fg[blue]$WINDOWMANAGER$fg[red] not executable, startx will not work.${reset_color}">&2
+    bailout
+  fi
+  if [ -w "$XINITRC" ] ; then
+    sed -i "s|^[^#]*exec.*|  exec $WINDOWMANAGER|g" $XINITRC
+  else
+    echo -e "#!/bin/sh\n  exec $WINDOWMANAGER" >> $XINITRC
+  fi
+  runit || failed
+fi
+# }}}
+
+## END OF FILE #################################################################
+# vim:foldmethod=marker expandtab ai ft=zsh sw=2

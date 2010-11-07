@@ -1,0 +1,46 @@
+grml-x(1)
+=========
+
+Name
+----
+grml-x - start X window system on grml-system
+
+Synopsis
+--------
+grml-x [ $windowmanager_you_want_to_use ]
+
+Description
+-----------
+
+grml-x depends on the autoconfiuration of the X11 server. It adjusts ~/.xinitrc
+for your specified window manager and then starts the X server.
+
+If you need to specify specific configuration options use *grml-x-legacy* instead.
+
+[[X7]]
+Usage examples
+--------------
+
+grml-x::
+        Start X11 with the last used window manager (per default /usr/bin/x-window-manager).
+
+grml-x wm-ng::
+        Start X11 with an enhanced fluxbox winodw manager.
+
+Known problems and limitations
+------------------------------
+
+grml-x does not support any kind of configuration for X itself. If you need this kind
+functionality use grml-x-legacy instead.
+
+Bugs
+----
+
+Please report feedback, link:http://grml.org/bugs/[bugreports] and wishes
+link:http://grml.org/contact/[to us]!
+
+Author
+------
+
+This manual page and grml-x itself have been written by Michael Prokop
+<mika@grml.org> and are licensed under the GPL v2 or any later version.
