@@ -1,28 +1,28 @@
-grml-x(1)
-=========
+grml-x-legacy(1)
+================
 
 Name
 ----
-grml-x - create xorg.conf file and start X window system on grml-system
+grml-x-legacy - create xorg.conf file and start X window system on grml-system
 
 Synopsis
 --------
-grml-x [ options ] $windowmanager_you_want_to_use
+grml-x-legacy [ options ] $windowmanager_you_want_to_use
 
 Description
 -----------
 
-grml-x creates the configuration file for the X server (X.org) providing
+grml-x-legacy creates the configuration file for the X server (X.org) providing
 hardware detection and then starts up X server with the specified window
 manager.
 
 Implementation
 --------------
 
-grml-x uses hwinfo for collection hardware related information for further
+grml-x-legacy uses hwinfo for collection hardware related information for further
 processing. It creates the X configuration file /etc/X11/xorg.conf for the X
 server (X.org) and needs root permissions therefore. If a X
-config file is present already, grml-x won't touch the file unless the '-force'
+config file is present already, grml-x-legacy won't touch the file unless the '-force'
 option or another option which modifies content of the X config file is
 specified. The old config file gets backed up via adding the extension .old
 (available as /etc/X11/xorg.conf.old therefore).
@@ -32,18 +32,18 @@ window manager and then startx is executed. If $HOME/.xinitrc does not exist a
 simple default one will be created.
 
 *******************************************************************************
-Important! Please do **not** run X or grml-x with root permissions!  When used in grml
-live-cd mode running grml-x works as normal user as well (thanks to sudo). Just
+Important! Please do **not** run X or grml-x-legacy with root permissions!  When used in grml
+live-cd mode running grml-x-legacy works as normal user as well (thanks to sudo). Just
 switch to an appropriate console where user grml is logged in (for example on
 tty5 via pressing Alt-F5).
-If you use grml-x on systems other than grml in live mode you can invoke
+If you use grml-x-legacy on systems other than grml in live mode you can invoke
 it as user root but please use the '-nostart' option to avoid startup
 X server. This allows you to generate a xorg.conf file on harddisk systems
 as well as on distributions other than grml/Debian.
 *******************************************************************************
 
 [NOTE]
-Notice that you do not have to use grml-x to start X server if you already have
+Notice that you do not have to use grml-x-legacy to start X server if you already have
 a working X config file (usually the case on harddisk installations).  Just
 adjust $HOME/.xinitrc to your needs (most common is adjusting the exec line for
 choosing the according windowmanager) and then run startx to start X server.
@@ -124,33 +124,33 @@ XOPTS='...'::
         Please notice that some window managers are not Xinerama-aware, and so some
         operations like window placement and resizing might not behave in an ideal way.
         This is an issue that needs to be dealt with in the individual window managers
-        and not within grml-x or X server.
+        and not within grml-x-legacy or X server.
 
 [[X7]]
 Usage examples
 --------------
 
-grml-x -mode '1280x1024 1024x768' wmi::
+grml-x-legacy -mode '1280x1024 1024x768' wmi::
         Use resolutions 1280x1024 and 1024x768 and start windowmanager wmi.
 
-grml-x -module vesa openbox::
+grml-x-legacy -module vesa openbox::
         Use vesa-module and start windowmanager openbox.
 
-grml-x -hsync "30-65" fluxbox::
+grml-x-legacy -hsync "30-65" fluxbox::
         Use 30-65kHz for horizontal sync frequency and start windowmanager fluxbox.
 
-grml-x -display 8 ratpoison::
+grml-x-legacy -display 8 ratpoison::
         Use display 8 for Xserver and start windowmanager ratpoison.
 
-grml-x -xinerama -composite openbox::
+grml-x-legacy -xinerama -composite openbox::
         Enable Xinerama setup and composite extension and start windowmanager openbox.
 
-grml-x -nostart -f fluxbox::
+grml-x-legacy -nostart -f fluxbox::
         Force writing of config file but do not start X server. Please do not forget to
-        add a window manager as last option because grml-x changes the according
+        add a window manager as last option because grml-x-legacy changes the according
         exec-statement in $HOME/.xinitrc.
 
-XOPTS=\'-depth 16\' grml-x fluxbox::
+XOPTS=\'-depth 16\' grml-x-legacy fluxbox::
         Set color depth to 16 bit and start windowmanager fluxbox.
 
 Known problems and limitations
@@ -159,9 +159,9 @@ Known problems and limitations
 Sometimes the X server does not find the correct resolution and/or frequency
 settings for the monitor. Please adjust configuration manually using the -hsync
 and the -vsync options then. Also check out the <<X7,usage examples section>> in
-this manpage and the help output of grml-x running 'grml-x -help'.
+this manpage and the help output of grml-x-legacy running 'grml-x-legacy -help'.
 
-The support for the Xinerama extension is brand new within grml-x and has not
+The support for the Xinerama extension is brand new within grml-x-legacy and has not
 been tested on many boxes but only on systems using the intel driver of current
 X server. Please provide feedback!
 
@@ -174,5 +174,5 @@ link:http://grml.org/contact/[to us]!
 Author
 ------
 
-This manual page and grml-x itself have been written by Michael Prokop
+This manual page and grml-x-legacy itself have been written by Michael Prokop
 <mika@grml.org> and are licensed under the GPL v2 or any later version.
