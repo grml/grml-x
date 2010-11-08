@@ -1,1008 +1,213 @@
-#!/bin/zsh
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+# vim: set et ts=4:
+
 # Filename:      grml-x
 # Purpose:       wrapper for startx on grml [providing new xconfiguration tool]
-# Authors:       grml-team (grml.org), (c) Michael Prokop <mika@grml.org>
+# Authors:       grml-team (grml.org), (c) Christian Hofstaedtler <ch@grml.org>
 # Bug-Reports:   see http://grml.org/bugs/
 # License:       This file is licensed under the GPL v2.
-################################################################################
+###############################################################################
+
+import os, subprocess, sys, tempfile, time, traceback
+from optparse import OptionParser
+
+class Section(object):
+    def __init__(self, name, identifier, data):
+        self.name = name
+        self.identifer = identifier
+        self.data = data
+        self.subsect = ""
+    def __str__(self):
+        s = "Section \"%s\"\n\tIdentifier \"%s\"\n" % (self.name, self.identifer)
+        for k in self.data:
+            v = self.data[k]
+            if isinstance(v, list):
+                v = '" "'.join(v)
+            elif '-' in v: # sync range
+                pass
+            else:
+                v = '"%s"' % v
+            s += "\t%s %s\n" % (k, v)
+        s += self.subsect
+        s += 'EndSection\n'
+        return s
+
+def get_monitor_section(options, force):
+    if not options.hsync and not options.vsync and not force:
+        return None
+    d = {}
+    d['HorizSync'] = options.hsync or '28.0 - 96.0'
+    d['VertRefresh'] = options.vsync or '50.0 - 60.0'
+    return Section('Monitor', 'Monitor0', d)
+
+def get_device_section(options):
+    if not options.module:
+        return None
+    d = {}
+    d['Driver'] = options.module
+    d['VendorName'] = 'All'
+    d['BoardName'] = 'All'
+    return Section('Device', 'Card0', d)
+
+def build_bootparams():
+    lines = []
+    def walk_bootparams_path(p):
+        try:
+            if not os.path.exists(p): return
+            for root, dirs, files in os.walk(p):
+                for name in files:
+                    f = open(os.path.join(root, name))
+                    lines.extend(f.readlines())
+                    f.close()
+        except:
+            print 'W: Error while getting bootparams from %s' % p
+    f = open('/proc/cmdline')
+    lines.append(f.readline())
+    f.close()
+    walk_bootparams_path('/cdrom/bootparams')
+    walk_bootparams_path('/live/image/bootparams')
+    params = {}
+    for p in ' '.join(lines).split(' '):
+        if '=' in p:
+            (k,v) = p.split('=', 2)
+            params[k] = v
+        else:
+            params[p] = True
+    return params
+
+def detect_qemu():
+    f = open('/proc/cpuinfo')
+    x = ''.join(f.readlines())
+    f.close()
+    if 'QEMU' in x: return True
+    return False
+
+def get_program_output(args):
+    p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=True)
+    return p.communicate()[0]
+
+def run_program(args):
+    subprocess.Popen(args, close_fds=True).wait()
+
+def which(program):
+    def is_exe(fpath):
+        return os.path.exists(fpath) and os.access(fpath, os.X_OK)
+
+    fpath, fname = os.path.split(program)
+    if fpath:
+        if is_exe(program):
+            return program
+    else:
+        for path in os.environ["PATH"].split(os.pathsep):
+            exe_file = os.path.join(path, program)
+            if is_exe(exe_file):
+                return exe_file
+
+    return None
+
+parser = OptionParser(usage="usage: %prog [options] [window-manager]")
+parser.add_option("--nostart", action="store_false", dest="start_server", default=True,
+                help="Don't start X server")
+parser.add_option("--display", action="store", type="string", dest="display",
+                help="Start X server on display DISPLAY")
+parser.add_option("--hsync", action="store", type="string", dest="hsync",
+                help="Force writing a HorizSync range")
+parser.add_option("--vsync", action="store", type="string", dest="vsync",
+                help="Force writing a VertRefresh range")
+parser.add_option("--mode", action="store", type="string", dest="mode",
+                help="Force a specific resolution")
+parser.add_option("--module", action="store", type="string", dest="module",
+                help="Force driver MODULE instead of Xorg autodetection")
+parser.add_option("-o", action="store", type="string", dest="xorg_conf", default="/etc/X11/xorg.conf",
+                help="Specify alternate xorg.conf file [default: %default]")
+parser.add_option("-f", "--force", action="store_true", dest="overwrite", default=False,
+                help="Overwrite xorg.conf if it exists [default: %default]")
+
+def main():
+    (options, args) = parser.parse_args()
+    bootparams = build_bootparams()
+
+    if os.getuid() == 0:
+        print "W: running as root is unsupported and may not work."
+        time.sleep(1)
+
+    if os.path.exists(options.xorg_conf):
+        if options.overwrite:
+            os.unlink(options.xorg_conf)
+        else:
+            print "E: Not overwriting existing %r without --force." % options.xorg_conf
+            print "I: If you previously ran grml-x, use startx /usr/bin/x-window-manager"
+            return 1
+
+    if 'xmode' in bootparams and not options.mode: options.mode = bootparams['xmode']
+    if 'xmodule' in bootparams and not options.module: options.module = bootparams['xmodule']
+
+    force_monitor = False
+    # cirrus driver for QEMU doesn't do 1024x768 without HorizSync set
+    if detect_qemu(): force_monitor = True
+
+    monitor = get_monitor_section(options, force_monitor)
+    device = get_device_section(options)
+
+    # build Screen section ourselves
+    d = {}
+    if monitor: d['Monitor'] = monitor.identifer
+    if device: d['Device'] = device.identifer
+    screen = Section('Screen', 'Screen0', d)
+    if options.mode:
+        d['DefaultColorDepth'] = 16
+        for depth in [8, 15, 16, 24, 32]:
+            screen.subsect += "SubSection \"Display\"\n\tDepth %d\n\tModes \"%s\"\t\nEndSubSection\n" % (depth, options.mode)
+
+    if len(args) == 1:
+        window_manager = args[0]
+        wm_path = which(window_manager)
+        if not wm_path:
+            print "E: Cannot find window manager %r, aborting." % window_manager
+            return 2
+        run_program(["sudo", "update-alternatives", "--set", "x-window-manager", wm_path])
+
+    config_empty = True
+    if monitor or device or len(screen.data) > 0 or screen.subsect != '':
+        config_empty = False
+
+    # write new config
+    if not config_empty:
+        try:
+            f = tempfile.NamedTemporaryFile(delete=False)
+            f.write('# Automatically generated by grml-x.\n')
+            f.write('# See man xorg.conf or /etc/X11/xorg.conf.example for more\n')
+            if monitor: f.write(str(monitor))
+            if device: f.write(str(device))
+            f.write(str(screen))
+            f.flush()
+            run_program(['sudo', 'mv', '-f', f.name, options.xorg_conf])
+        finally:
+            f.close()
+
+    if options.start_server:
+        xinitrc = '~/.xinitrc'
+        if 'XINITRC' in os.environ: xinitrc = os.environ['XINITRC']
+        xinitrc = os.path.expanduser(xinitrc)
+        startx = ['startx']
+        if os.path.exists(xinitrc):
+            startx.append(xinitrc)
+        else:
+            startx.append(which('x-window-manager'))
+        startx.append('--')
+        if options.display: startx.append(':' + options.display)
+        print "Starting X: %r" % startx
+        run_program(startx)
+
+    return 0
+
+if __name__ == '__main__':
+    rc = 1
+    try:
+        rc = main()
+    except Exception:
+        print "E: Exception: ",
+        traceback.print_exc()
+    sys.exit(1)
 
-# debugging {{{
-# usage: DEBUG=1 grml-x ..... 2>/tmp/grml-x-debug.log
-  if [[ $DEBUG -gt 0 ]]; then
-      setopt xtrace
-  fi
-# }}}
-
-# functions and color {{{
-  # use colors only if not booted with nocolor bootoption
-  if ! grep -q nocolor /proc/cmdline ; then
-     autoload colors ; colors
-     [ -r /etc/grml_colors ] && . /etc/grml_colors
-  fi
-
-  # some functions like getBootParam
-  if [ -r /etc/grml/script-functions -a -r /etc/grml/sh-lib ] ; then
-     source /etc/grml/script-functions
-     source /etc/grml/sh-lib
-  else
-    echo 'Error: sourcing function files failed. Exiting.'
-    exit 1
-  fi
-
-  check4root &>/dev/null && ROOT='1' || ROOT=''
-# }}}
-
-# set variables  {{{
-  PROGRAMNAME=${0##*/}
-  HWINFO='/usr/sbin/hwinfo'
-  DATE=$(date)
-  [ -n "$XINITRC" ] || XINITRC="$HOME/.xinitrc"
-
-  # temporary files
-  # notice: we need the unsafe option, otherwise users other than root
-  # can not write to HWINFO_TMP, but we don't want to run hwinfo as root
-  HWINFO_TMP="$(mktemp -u)" || exit 1
-  MONITORINFO="$(mktemp)"   || exit 1
-  MOUSEINFO="$(mktemp)"     || exit 1
-
-  if [ -z "$HWINFO_TMP" ] ; then
-     echo "Fatal: could not create temporary file. Exiting.">&2
-     bailout 1
-  fi
-
-  if [ -r /etc/sysconfig/keyboard ] ; then
-    source /etc/sysconfig/keyboard
-  else
-    XKEYBOARD='us'
-  fi
-
-  XSERVER="Xorg"
-  XCONFIG='/etc/X11/xorg.conf'
-  KEYBOARD="# Driver      \"kbd\"
-#         Option      \"XkbRules\"   \"xfree86\"
-#         Option      \"XkbRules\"   \"xorg\"
-#         Option      \"XkbModel\"   \"pc105\"
-#         Option      \"XkbLayout\"  \"${XKEYBOARD},us\"
-#         Option      \"XkbVariant\" \"nodeadkeys\""
-
-  # check for font path
-  if [ -d /usr/share/fonts/X11 ] ; then
-     XFONTS="        FontPath     \"/usr/share/fonts/X11/misc\"
-        FontPath     \"/usr/share/fonts/X11/100dpi/:unscaled\"
-        FontPath     \"/usr/share/fonts/X11/75dpi/:unscaled\"
-        FontPath     \"/usr/share/fonts/X11/Type1\"
-        FontPath     \"/usr/share/fonts/X11/100dpi\"
-        FontPath     \"/usr/share/fonts/X11/75dpi\""
-  fi
-  # /usr/X11R6/lib/X11/fonts exists nearly everywhere, assume
-  # /usr/X11R6/lib/X11/fonts as valid font path only if fonts.dir
-  # exists for "misc"
-  if [ -r /usr/X11R6/lib/X11/fonts/misc/fonts.dir ] ; then
-      XFONTS="$XFONTS
-        FontPath     \"/usr/X11R6/lib/X11/fonts/Type1\"
-        FontPath     \"/usr/X11R6/lib/X11/fonts/misc:unscaled\"
-        FontPath     \"/usr/X11R6/lib/X11/fonts/misc\"
-        FontPath     \"/usr/X11R6/lib/X11/fonts/75dpi:unscaled\"
-        FontPath     \"/usr/X11R6/lib/X11/fonts/75dpi\"
-        FontPath     \"/usr/X11R6/lib/X11/fonts/100dpi:unscaled\"
-        FontPath     \"/usr/X11R6/lib/X11/fonts/100dpi\""
-  fi
-# }}}
-
-# make sure we don't leave any temp files {{{
-bailout() {
-  rm -f "$HWINFO_TMP" "$MONITORINFO" "$MOUSEINFO"
-  [ -n "$1" ] && EXIT="$1" || EXIT="1"
-  print "$bg[black]$fg[red]${bold_color}Exiting...${reset_color}">&2
-  exit "$EXIT"
-}
-
-trap bailout 1 2 3 15
-# }}}
-
-# warn if running as user root {{{
-  if [ -n "$ROOT" ] ; then
-     if [ -r /etc/grml_cd ] ; then
-        print "$bg[black]$fg[red]${bold_color}Warning: Please do not run grml-x as user root.${reset_color}"
-        print "$bg[black]$fg[red]${bold_color}Running grml-x as user root is *not* supported!${reset_color}"
-        print "$bg[black]$fg[red]${bold_color}Switch to user grml or run su - grml -c 'grml-x ...' instead.${reset_color}"
-        print ''
-     else
-        print "$bg[black]$fg[red]${bold_color}Warning: Please do not run X.org as user root!${reset_color}"
-        print "$bg[black]$fg[red]${bold_color}As soon as you have a working $XCONFIG please use startx instead of grml-x.${reset_color}"
-        print ''
-     fi
-  fi
-  fstabuser=$(grep ':x:1000:' /etc/passwd)
-  fstabuser=${fstabuser%%[:]*}
-# }}}
-
-# usage information {{{
-usage()
-{
-  if [[ $1 != '' ]] ; then echo 1>&2 "\n$1" ; fi
-  print "$bg[black]$fg[red]$bold_color"
-  print 1>&2 "
-Usage: $PROGRAMNAME
-       $PROGRAMNAME [-options] windowmanager
-
-Usage examples:
-  $PROGRAMNAME fluxbox
-  $PROGRAMNAME -force -nostart fluxbox
-  $PROGRAMNAME -nosynaptics fluxbox
-  $PROGRAMNAME -nosync fluxbox
-  $PROGRAMNAME -noddc fluxbox
-  $PROGRAMNAME -xinerama -composite fluxbox
-  $PROGRAMNAME -module radeon -mode 1024x768 -vsync 60 fluxbox
-  XINITRC=~/.xinitrc $PROGRAMNAME fluxbox
-  $PROGRAMNAME -display 8 fluxbox
-
-More information on grml-x can be found in the manual page: man grml-x
-"
-  print "${reset_color}"
-  exit 2
-}
-# }}}
-
-# writehwinfo {{{
-writehwinfo()
-{
-   if [ -n "$ROOT" ] ; then
-     su - $fstabuser -c "$HWINFO > $HWINFO_TMP"
-   else
-     $HWINFO > $HWINFO_TMP
-   fi
-}
-# }}}
-
-# monitor {{{
-monitor()
-{
-  sudo $HWINFO --monitor > $MONITORINFO
-}
-# }}}
-
-# mode {{{
-mode()
-{
-   [ -r "$MONITORINFO" ] || monitor # get monitor settings
-   modes=$(perl -e 'while (<STDIN>) {if (/  Resolution:/) { s/.*\s+(\d+x\d+).*/$1/; print} }' < $MONITORINFO |
-sort -nur | perl -ne 's/\s+/ /; s/(\d+x\d+)/"$1"/; print')
-
-   if [ -n "$XINERAMA" ] ; then
-
-      print "$fg[green]
-
-Option for $fg[yellow]Xinerama$fg[green] found, please use xrandr inside X.org for your further configuration!
-Trying to identify monitors now..."
-
-      # make sure we have information from 2 monitors:
-      # - first one from 'hwinfo --monitor'      => $MONITORINFO
-      # - second one from 'hwinfo --framebuffer' => $FRAMEBUFFER
-      FRAMEBUFFER=$(hwinfo --framebuffer | grep 'Mode 0x.* bits' | head -1)
-      if [ -z "$FRAMEBUFFER" ] ; then
-         print "$fg[red]
-Fatal: could not identify two monitors - no chance to
-       set up multihead using Xinerama - sorry. :-(
-
-Please run grml-x without the -xinerama option to start
-X anyway (dropping support for Xinerama of course) and
-contact grml developers if you have any further useful
-information.                  => http://grml.org/bugs/
-"
-         bailout 10
-      fi
-
-      # check whether we can read the $MONITORINFO file
-      if ! [ -r "$MONITORINFO" ] ; then
-         print "$fg[red]
-Fatal: could not identify monitor - no chance to
-       set up multihead using Xinerama - sorry. :-(
-"
-         bailout 11
-      else
-         # Currently we only know that it works with current intel driver,
-         # so inform user about that:
-         if [[ "$MODULE" != "intel" ]] ; then
-            print "$fg[red]
-
-Warning: using a non-intel driver - trying Xinerama setup anyway.
-If it worked please contact grml developers providing information
-about your setup so we can adjust grml-x according!
-
-      -> http://grml.org/contact/
-
-Sleeping for 10 seconds now... Will continue then...
-Just press Ctrl-C to cancel operation.
-"
-            sleep 10
-         fi
-
-         # now calculate Virtual size for use with Xinerama
-         HORIZ_RES1="$(grep 'Max. Resolution:' $MONITORINFO | sed 's/    Max\. Resolution: \(.*\)x\(.*\)/\1/')"
-         VERIZ_RES1="$(grep 'Max. Resolution:' $MONITORINFO | sed 's/    Max\. Resolution: \(.*\)x\(.*\)/\2/')"
-	 # it might happen that we don't have a Max Resolution in hwinfo output :-/
-         # fall back to a generic value then...
-         # TODO: check out how to get resolution of external monitor from console
-	 if [ -z "$HORIZ_RES1" ] ; then
-            HORIZ_RES1="1024"
-            VERIZ_RES1="768"
-         fi
-
-	 # get maximum of output
-         HORIZ_RES2="$(echo $FRAMEBUFFER | grep 'Mode 0x' | sed 's/  Mode 0x.*: \(.*\)x.*/\1/'| sort -u | head -1)"
-         VERIZ_RES2="$(echo $FRAMEBUFFER | grep 'Mode 0x' | sed 's/  Mode 0x.*x\(.*\) (.*/\1/' | sort -u | head -1)"
-
-         if [ -n "$HORIZ_RES1" -a -n "$VERIZ_RES1" -a -n "$HORIZ_RES2" -a -n "$VERIZ_RES2" ] ; then
-            if [ "$(echo $VERIZ_RES1" - "$VERIZ_RES2 | bc -l)" -eq 0 ] ; then
-            VERIZ_RESULT="$VERIZ_RES1"
-            elif [ "$VERIZ_RES1" -gt "$VERIZ_RES2" ] ; then
-               VERIZ_RESULT="$VERIZ_RES1"
-            else
-               VERIZ_RESULT="$VERIZ_RES2"
-            fi
-
-            HORIZ_RESULT=$(echo $HORIZ_RES1 + $HORIZ_RES2 | bc -l)
-
-            # important: keep newline for appropriate placing below $MODES!
-            if [ -n "$HORIZ_RESULT" ] ; then
-               VIRTUAL="
-                Virtual $HORIZ_RESULT $VERIZ_RES1"
-            fi
-         fi
-       fi
-   fi
-
-   if [[ -n $NODDC ]] ; then
-     MODES="Modes \"1024x768\" \"800x600\" \"640x480\"  \"1600x1200\" \"1280x1024\" \"1280x960\"$VIRTUAL"
-   elif [[ "$modes" == "\"1024x768\" " || -z $modes ]] ; then
-     MODES="# Modes \"1024x768\" \"800x600\" \"640x480\"  \"1600x1200\" \"1280x1024\" \"1280x960\"$VIRTUAL"
-   else
-     MODES="# Modes $modes$VIRTUAL"
-   fi
-}
-# }}}
-
-# sync - get hsync/vsync settings {{{
-sync()
-{
-   [ -r "$MONITORINFO" ] || monitor # get monitor settings
-   [ -r "$MONITORINFO" ] || bailout 1
-   vsyncval=$(awk '/Vert. Sync Range:/{print $4}' $MONITORINFO | sed 's/-/.0 - / ; s/$/.0/' | head -1)
-   hsyncval=$(awk '/Hor. Sync Range:/{print $4}'  $MONITORINFO | sed 's/-/.0 - / ; s/$/.0/' | head -1)
-   if [ -z $vsyncval ] ; then
-     vsyncval='50.0 - 60.0'
-   fi
-   if [ -z $hsyncval ] ; then
-     hsyncval='28.0 - 96.0'
-   fi
-}
-# }}}
-
-# mouse {{{
-mouse()
-{
-   sudo $HWINFO --mouse > $MOUSEINFO
-
-   # SynPS/2 Synaptics TouchPad
-   if grep -q 'Device:.*Synaptics' "$MOUSEINFO" ; then
-    if [[ "$SYNAPTICS" == "yes" ]] ; then # check for '-nosynaptics'-option
-     MOUSEDRIVER='synaptics'
-     SYNMOUSE='InputDevice    "Synaptics" # "AlwaysCore"'
-     SYNMOUSEDETAIL="
-Section \"InputDevice\"
-  Driver        \"synaptics\"
-  Identifier    \"Synaptics\"
-  Option        \"Device\"        \"/dev/psaux\"
-  Option        \"Protocol\"      \"auto-dev\"
-  Option        \"LeftEdge\"      \"1700\"
-  Option        \"RightEdge\"     \"5300\"
-  Option        \"TopEdge\"       \"1700\"
-  Option        \"BottomEdge\"    \"4200\"
-  Option        \"FingerLow\"     \"25\"
-  Option        \"FingerHigh\"    \"30\"
-  Option        \"ZAxisMapping\"   \"4 5\"
-  Option        \"MaxTapTime\"    \"180\"
-  Option        \"MaxTapMove\"    \"220\"
-  Option        \"VertScrollDelta\" \"100\"
-  Option        \"MinSpeed\"      \"0.06\"
-  Option        \"MaxSpeed\"      \"0.12\"
-  Option        \"AccelFactor\" \"0.0010\"
-#  Option       \"SHMConfig\"     \"on\"
-#  Option       \"Repeater\"      \"/dev/ps2mouse\"
-EndSection
-"
-    else
-     MOUSEDRIVER='mouse'
-     SYNMOUSEDETAIL=""
-     SYNMOUSE='# No synaptics touchpad detected.'
-    fi
-   else
-
-    # AlpsPS/2 ALPS TouchPad (with Synapticsdriver)
-    if grep -q 'Device:.*ALPS' "$MOUSEINFO" ; then
-     if [[ "$SYNAPTICS" == "yes" ]] ; then # check for '-nosynaptics'-option
-      MOUSEDRIVER='synaptics'
-      SYNMOUSE='InputDevice    "Synaptics" # "AlwaysCore"'
-      SYNMOUSEDETAIL="
-Section \"InputDevice\"
-  Driver        \"synaptics\"
-  Identifier    \"Synaptics\"
-  Option        \"Device\"        \"/dev/psaux\"
-  Option        \"Protocol\"      \"auto-dev\"
-  Option        \"LeftEdge\"      \"120\"
-  Option        \"RightEdge\"     \"850\"
-  Option        \"TopEdge\"       \"120\"
-  Option        \"BottomEdge\"    \"650\"
-  Option        \"FingerLow\"     \"14\"
-  Option        \"FingerHigh\"    \"15\"
-  Option        \"ZAxisMapping\"   \"4 5\"
-  Option        \"MaxTapTime\"    \"180\"
-  Option        \"MaxTapMove\"    \"50\"
-  Option        \"MaxDoubleTapTime\"    \"100\"
-  Option        \"VertScrollDelta\" \"20\"
-  Option        \"HorizScrollDelta\" \"20\"
-  Option        \"MinSpeed\"      \"0.3\"
-  Option        \"MaxSpeed\"      \"2.00\"
-  Option        \"AccelFactor\" \"0.030\"
-  Option        \"UpDownScrolling\" \"1\"
-  Option        \"EmulateMiddleButtonTime\" \"75\"
-  Option        \"CircularScrolling\" \"1\"
-  Option        \"CircScrollDelta\" \"0.1\"
-  Option        \"CircScrollTrigger\" \"8\"
-#  Option       \"SHMConfig\"     \"on\"
-#  Option       \"Repeater\"      \"/dev/ps2mouse\"
-EndSection
-"
-     else
-      MOUSEDRIVER='mouse'
-      SYNMOUSEDETAIL=""
-      SYNMOUSE='# No alps touchpad detected.'
-     fi
-    else
-      SYNMOUSE='# No synaptics/alps touchpad present.'
-    fi
-   fi
-
-   # USB-PS/2 Optical Mouse
-   if [ -n "$USE_USB" ] ; then
-     USBMOUSE='InputDevice    "USB Mouse"     "CorePointer"'
-     USBMOUSEDETAIL="
-Section \"InputDevice\"
-        Identifier      \"USB Mouse\"
-        Driver          \"mouse\"
-        Option          \"Device\"                \"/dev/input/mice\"
-        Option          \"Protocol\"              \"auto\"
-        Option          \"ZAxisMapping\"          \"4 5\"
-        Option          \"Buttons\"               \"5\"
-        Option          \"SendCoreEvents\"        \"true\"
-EndSection
-"
-   else
-     USBMOUSE='# InputDevice    "USB Mouse"     "CorePointer"'
-     USBMOUSEDETAIL=''
-   fi
-
-   if grep -q 'Device:.*Serial' "$MOUSEINFO" ; then
-     SERIAL='yes'
-     SERMOUSE='InputDevice    "Serial Mouse"     "CorePointer"'
-     SERMOUSEDETAIL="
-Section \"InputDevice\"
-        Identifier  \"Serial Mouse\"
-        Driver      \"mouse\"
-        Option      \"Device\" \"/dev/ttyS0\"
-        Option      \"Protocol\" \"Microsoft\"
-        Option      \"Emulate3Buttons\" \"true\"
-        Option      \"Emulate3Timeout\" \"70\"
-        Option      \"SendCoreEvents\"  \"true\"
-EndSection
-"
-   else
-     SERMOUSE='# No serial mouse detected.'
-     SERMOUSEDETAIL=''
-   fi
-
-   # ImExPS/2 Logitech Explorer Mouse
-   # "PS2++ Logitech MX Mouse"
-   if [ -n "$USE_PS2" ] ; then
-      PS2='yes'
-      PS2MOUSE='InputDevice    "PS/2 Mouse"    "CorePointer"'
-      PS2MOUSEDETAIL="
-Section \"InputDevice\"
-        Identifier  \"PS/2 Mouse\"
-        Driver      \"mouse\"
-        Option      \"Device\" \"/dev/input/mice\"
-        # Option      \"Device\" \"/dev/psaux\"
-        Option      \"Protocol\" \"PS/2\"
-        Option      \"Emulate3Buttons\" \"true\"
-        Option      \"Emulate3Timeout\" \"70\"
-        Option      \"SendCoreEvents\"  \"true\"
-EndSection
-"
-     else
-      PS2MOUSE='# InputDevice    "PS/2 Mouse"    "CorePointer"'
-      PS2MOUSEDETAIL=''
-     fi
-
-     EVDEV_MOUSE="
-# Section \"InputDevice\"
-#         Identifier      \"Generic Mouse\"
-#         Driver          \"evdev\"
-#         Option          \"Device\"                \"/dev/input/mice\"
-#         Option          \"Protocol\"              \"auto\"
-#         Option          \"ZAxisMapping\"          \"4 5\"
-#         Option          \"Buttons\"               \"5\"
-#         Option          \"SendCoreEvents\"        \"true\"
-# EndSection
-"
-
-   MOUSE="        $USBMOUSE
-        $PS2MOUSE
-        $SYNMOUSE
-        $SERMOUSE"
-}
-# }}}
-
-# commandline parsing {{{
-parse_options()
-{
-   zparseopts -K -- module:=o_module help=o_help noddc=o_noddc nosync=o_nosync \
-                    vsync:=o_vsync hsync:=o_hsync mode:=o_mode force=o_force display:=o_display   \
-                    nostart=o_nostart nodpms=o_nodpms nosynaptics=o_nosynaptics nousb=o_nousb \
-                    nops2=o_nops2 genmouse=o_genmouse novref=o_novref nohsync=o_nohsync \
-                    fallback=o_fallback usb=o_usb ps2=o_ps2 composite=o_composite \
-		    xinerama=o_xinerama
-
-   if [[ $# == 0 || "$o_help" != "" || "$1" == '-h' || "$1" == '--help' ]]; then
-      usage
-   fi
-
-   if [[ "$o_force" != "" ]]; then
-      FORCE='yes'
-   fi
-
-   if [[ "$o_fallback" != "" ]]; then
-      FALLBACK="yes"
-      if [ -r /etc/X11/xorg.conf.example ] ; then
-         sudo cp /etc/X11/xorg.conf.example $XCONFIG
-         print "$bold_color$fg[blue]Copying /etc/X11/xorg.conf.example to $XCONFIG as requested via fallback option."
-      else
-         echo 'Error: /etc/X11/xorg.conf.example not readable, exiting.'
-         exit 1
-      fi
-   fi
-
-   if [[ "$o_nodpms" != "" ]]; then
-      DPMS='Option       "DPMS"      "false"'
-   else
-      DPMS='Option       "DPMS"      "true"'
-   fi
-
-   if [[ "$o_noddc" != "" ]]; then
-      NODDC="yes"
-   fi
-
-   if [[ "$o_vsync" != "" ]]; then
-      FORCE="yes"
-   fi
-
-   if [[ "$o_hsync" != "" ]]; then
-      FORCE="yes"
-   fi
-
-   if [[ "$o_nousb" != "" ]]; then
-      echo 'Warning: option -nousb is deprecated.'>&2
-   fi
-
-   if [[ "$o_usb" != "" ]]; then
-      USE_USB='yes'
-   fi
-
-   if [[ "$o_nops2" != "" ]]; then
-      echo 'Warning: optino -nops2 is deprecated˙'>&2
-   fi
-
-   if [[ "$o_ps2" != "" ]]; then
-      USE_PS2='yes'
-   fi
-
-   if [[ "$o_genmouse" != "" ]]; then
-      GENERICMOUSE='yes'
-   fi
-
-   if [[ "$o_nosynaptics" != "" ]]; then
-      SYNAPTICS='no'
-   else
-      SYNAPTICS='yes'
-   fi
-
-   if [[ "$o_nostart" != "" ]]; then
-      NOSTART="yes"
-   fi
-
-   DISPLAY=$o_display[2]
-
-   eval WINDOWMANAGER=\${$#}
-
-   if [[ "$XKEYBOARD" == de ]] ; then
-      KEYBOARD="$KEYBOARD
-#         Option      \"XkbVariant\" \"nodeadkeys\""
-   fi
-
-   if [ -n "$FORCE" -o ! -r "$XCONFIG" -a -z "$FALLBACK" ] ; then
-     print -n "$bold_color$fg[blue]Gathering hardware information...$fg[red]"
-
-     sync # get hsync/vsync
-
-     if [ -z "$o_hsync" ] ; then
-       o_hsync=(-hsync "$hsyncval")
-       HSYNC=$o_hsync[2]
-       HORIZSYNC="        HorizSync    $HSYNC"
-     else
-       o_hsync=(-hsync "$o_hsync[2]")
-       HSYNC=$o_hsync[2]
-       HORIZSYNC="        HorizSync    $HSYNC"
-     fi
-
-     if [ -z "$o_vsync" ] ; then
-       o_vsync=(-vsync "$vsyncval")
-       VSYNC=$o_vsync[2]
-       VERTISYNC="        VertRefresh  $VSYNC"
-     else
-       o_vsync=(-vsync "$o_vsync[2]")
-       VSYNC=$o_vsync[2]
-       VERTISYNC="        VertRefresh  $VSYNC"
-     fi
-
-     if [[ "$o_nosync" != "" ]]; then
-        HORIZSYNC="#       HorizSync   28.0 - 96.0  # deactivated via -nosync option of grml-x"
-        VERTISYNC="#       VertRefresh 50.0 - 60.0  # deactivated via -nosync option of grml-x"
-     fi
-
-     if [[ "$o_nohsync" != "" ]]; then
-        HORIZSYNC="#       HorizSync   28.0 - 96.0  # deactivated via -nohsync option of grml-x"
-     fi
-
-     if [[ "$o_novref" != "" ]]; then
-        VERTISYNC="#       VertRefresh 50.0 - 60.0  # deactivated via -novref option of grml-x"
-     fi
-
-     if [[ "$o_xinerama" != "" ]]; then
-        XINERAMA=1
-     fi
-
-     if [[ "$o_composite" != "" ]]; then
-        COMPOSITE="Section \"Extensions\"
-    Option \"Composite\" \"Enable\"
-EndSection"
-     else
-        COMPOSITE="#Section \"Extensions\"
-#    Option \"Composite\" \"Enable\"
-#EndSection"
-     fi
-
-     # write hwinfo stuff
-     writehwinfo
-
-     # monitor stuff
-     [ -r "$HWINFO_TMP" ] || bailout 1
-     MONITOR=$(awk '/monitor.1:/{print $3}' $HWINFO_TMP)
-     [[ $MONITOR != 'ddc' ]] && NODDC=yes
-
-     # module handling
-     MODULE=$o_module[2]
-     if [ -z "$MODULE" ] ; then
-       MODULE="$(getBootParam xmodule 2>/dev/null)"
-       if [ -z "$MODULE" ] ; then
-         MODULE=$(grep 'XFree86 v4 Server Module:' "${HWINFO_TMP}" | head -1 | awk '{print $5}')
-         if [ -z "$MODULE" ] ; then
-           MODULE='vesa'
-         fi
-         # hwinfo >=13.28 reports driver 'intel' instead of i810
-         if [[ "$MODULE" == 'intel' ]] ; then
-            [ -r /usr/lib/xorg/modules/drivers/intel_drv.so ] || MODULE='i810'
-         fi
-       fi
-     else
-       FORCE="yes"
-     fi
-
-     mouse    # get mouse settings
-     VGA=$(lspci | grep VGA | sed 's/.*compatible controller: //' | head -1)
-
-     MODE=$o_mode[2]
-     if [ -z $MODE ] ; then
-       B_MODE="$(getBootParam xmode 2>/dev/null)"
-       if [ -n "$B_MODE" ] ; then
-         MODES="Modes \"$B_MODE\""
-         FORCE="yes"
-       fi
-       if [ -z "$MODES" ] ; then
-          mode # get available modes
-       fi
-     else
-       MODES="Modes \"$MODE\""
-       FORCE="yes"
-     fi
-
-     print "$fg[green]done$reset_color"
-     print "$bg[black]$fg[white]$bold_color"
-     print "$fg[green]Specified windowmanager is $fg[yellow]$WINDOWMANAGER"
-     print "$fg[green]Video is $fg[yellow]$VGA$fg[green] using $bg[black]$fg[yellow]${XSERVER}$fg[cyan](${MODULE})$fg[green] Server"
-     [[ -z $HSYNC ]] && [[ -z $VSYNC ]] && print "$fg[green]Monitor is $fg[yellow]$MONITOR"
-     [[ -z $HSYNC ]] && [[ -n $VSYNC ]] && print "$fg[green]Monitor is $fg[yellow]$MONITOR$fg[green], VSYNC: $fg[yellow]$VSYNC"
-     [[ -z $VSYNC ]] && [[ -n $HSYNC ]] && print "$fg[green]Monitor is $fg[yellow]$MONITOR$fg[green], HSYNC: $fg[yellow]$HSYNC"
-     [[ -n $VSYNC ]] && [[ -n $HSYNC ]] && print "$fg[green]Monitor is $fg[yellow]$MONITOR$fg[green], HSYNC: $fg[yellow]$HSYNC $fg[green]VSYNC: $fg[yellow]$VSYNC"
-     [[ -n $modes ]] && print "$fg[green]Using default X.org modes."
-     [[ -z $modes ]] && print "$fg[green]Using Mode: $fg[yellow]$MODE"
-     print "${reset_color}"
-   fi
-}
-parse_options $*
-# }}}
-
-# check for requirements {{{
-requirements()
-{
-if ! [ -x $(which hwinfo) ] ; then
-  print "$bg[black]$fg[red]${bold_color}Error: hwinfo not found in path.${reset_color}
-Note:  run 'aptitude install hwinfo' on systems running debian.
-Exiting.${reset_color}"
-  exit -1
-fi
-
-if ! [[ -d /sys ]] ; then
-  print "$bg[black]$fg[red]${bold_color}Error: mounted /sys required (for hwinfo).${reset_color}
-You may want to add the following line to your /etc/fstab:
-
-  sysfs /sys sysfs defaults 0 0
-
-or just run 'mount /sys'. Exiting.${reset_color}"
-  exit -1
-fi
-}
-requirements
-# }}}
-
-# xconfig {{{
-xconfig() {
-cat << EOX
-################################################################################
-# Filename:      $XCONFIG
-# Purpose:       config file for xserver - generated by grml-x
-# Bug-Reports:   see http://grml.org/bugs/
-# Latest change: ${DATE}
-# See also:
-#   /usr/share/doc/xserver-xorg/   and
-#   http://wiki.x.org/wiki/Home    and
-#   http://ftp.x.org/pub/X11R7.0/doc/html/index.html for information on Xorg
-#
-# Refer to the xorg.conf man page and to
-# http://ftp.x.org/pub/X11R7.0/doc/html/xorg.conf.5.html
-# for details about the format of this file.
-#
-# See http://wiki.debian.org/XStrikeForce/FAQ for information
-# regarding Xorg packages within Debian.
-#
-# If you would like this file to be automatically reconfigured by debian,
-# run the following command:
-#   sudo dpkg-reconfigure -phigh xserver-xorg
-################################################################################
-
-Section "ServerLayout"
-        Identifier     "XServer Configured"
-        Screen      0  "Screen0" 0 0
-        # InputDevice    "Keyboard0"     "CoreKeyboard"
-        # InputDevice    "Generic Mouse" "CorePointer"
-        Option "AutoAddDevices" "off" # do not depend on running dbus/hal
-$MOUSE
-EndSection
-
-Section "ServerFlags"
-        Option "AllowMouseOpenFail"  "true"  # allows the server to start up even if the mouse does not work
-        Option "DontVTSwitch"        "false" # allow switching between virtual terminal
-        Option "DontZap"             "false" # enable <Crtl><Alt><BS> (server abort)
-        # Option "DontZoom"            "true"  # disable <Crtl><Alt><KP_+>/<KP_-> (resolution switching)
-EndSection
-
-Section "Files"
-        # More information:  http://ftp.x.org/pub/X11R7.0/doc/html/fonts.html
-$XFONTS
-        # FontPath     "/usr/share/fonts/ttf/western"
-        # FontPath     "/usr/share/fonts/ttf/decoratives"
-        FontPath     "/usr/share/fonts/truetype/ttf-bitstream-vera"
-        FontPath     "/usr/share/fonts/latex-ttf-fonts"
-        FontPath     "/var/lib/defoma/x-ttcidfont-conf.d/dirs/TrueType"
-EndSection
-
-# Modules - see /usr/lib/xorg/modules/fonts and /usr/lib/xorg/modules/extensions
-Section "Module"
-        Load  "dbe"       # double buffer extension
-        Load  "dri"       # direct rendering
-        Load  "glx"       # 3D layer / GLX extension
-        Load  "extmod"    # some commonly used server extensions (e.g. shape extension)
-        Load  "record"    # recording extension
-        Load  "evdev"     # generic input handling driver on Linux
-        Load  "xtrap"     # X Trap extension
-        # Load  "freetype"  # freetype fonts rendering
-        # Load  "i2c"       # I2C bus
-        # Load  "int10"     # initialize graphics cards via int10 call to the BIOS
-        # Load  "type1"     # type1 font module
-        # Load  "v4l"       # Video for Linux
-        # Load  "vbe"       # Vesa BIOS Extension
-        ## Deprecated/unneeded modules with Xorg >=7.0:
-        # Load  "speedo"    # font module (does not exist anymore)
-        # Load  "ddc"       # ddc probing of monitor (automatically loaded)
-        # Load  "GLcore"    # render OpenGL in software (automatically loaded)
-        # Load  "bitmap"    # bitmap fonts (automatically loaded)
-# Valid entries - see /usr/lib/xorg/modules/[extensions/]
-# afb bitmap cfb cfb16 cfb24 cfb32 cw damage dbe ddc dri drm extmod fb
-# fbdevhw freetype GLcore glx i2c int10 int10 layer mfb pcidata rac ramdac
-# record scanpci shadow shadowfb type1 vbe vgahw xaa xf1bpp xf24_32bpp xf4bpp
-# xf8_16bpp xf8_32bpp xtrap
-EndSection
-
-# If you'd like to switch the positions of your capslock and control keys, use:
-# Option "XkbOptions" "ctrl:swapcaps"
-# Or if you just want both to be control, use:
-# Option "XkbOptions" "ctrl:nocaps"
-# More information: http://ftp.x.org/pub/X11R7.0/doc/html/XKB-Config.html
-# Section "InputDevice"
-#         Identifier  "Keyboard0"
-#         Option      "CoreKeyboard"
-#         $KEYBOARD
-#         # Option      "XkbOptions" "ctrl:swapcaps,grp:alt_shift_toggle,grp_led:scroll,compose:menu"
-# EndSection
-
-# More information: http://ftp.x.org/pub/X11R7.0/doc/html/mouse.html
-${USBMOUSEDETAIL}${PS2MOUSEDETAIL}${SERMOUSEDETAIL}${SYNMOUSEDETAIL}${EVDEV_MOUSE}
-Section "Monitor"
-        Identifier   "Monitor0"
-#       ModelName    "Old Monitor (no DDC)"
-        $DPMS
-#       HorizSync    28.0 - 78.0 # Warning: This may fry very old Monitors
-#       HorizSync    28.0 - 96.0 # Warning: This may fry old Monitors
-$HORIZSYNC
-#       VertRefresh  50.0 - 76.0 # Very conservative. May flicker.
-#       VertRefresh  50.0 - 60.0 # Extreme conservative. Will flicker. TFT default.
-$VERTISYNC
-# Need more information?
-#  http://xtiming.sourceforge.net/cgi-bin/xtiming.pl
-#  http://en.tldp.org/HOWTO/XFree86-Video-Timings-HOWTO/
-EndSection
-
-Section "Device"
-        ### Available Driver options are:
-        ## sw_cursor is needed for some ati and radeon cards
-        # Option     "sw_cursor"
-        # Option     "hw_cursor"
-        # Option     "NoAccel"
-        # Option     "ShowCache"
-        # Option     "ShadowFB"
-        # Option     "UseFBDev"
-        # Option     "Rotate"
-        ## xorg + nvidia:
-        # Option "RenderAccel" "true"
-        # Option "AllowGLXWithComposite" "true"
-        Identifier  "Card0"
-        # The following line is auto-generated by grml-x
-        Driver      "$MODULE"
-        VendorName  "All"
-        BoardName   "All"
-        ## Workaround for drivers (for example radeon) which might send output to wrong device:
-        # Option "MonitorLayout" "LVDS, AUTO"
-        # Option "MonitorLayout" "LVDS, CRT"
-        # Option "MonitorLayout" "NONE, STV"
-        # Option "MonitorLayout" "LVDS"
-        ## Specify BusID:
-        # BusID       "PCI:1:0:0"
-EndSection
-
-Section "Screen"
-        Identifier "Screen0"
-        Device     "Card0"
-        Monitor    "Monitor0"
-        DefaultColorDepth 16
-        SubSection "Display"
-                Depth     1
-                $MODES
-        EndSubSection
-        SubSection "Display"
-                Depth     4
-                $MODES
-        EndSubSection
-        SubSection "Display"
-                Depth     8
-                $MODES
-        EndSubSection
-        SubSection "Display"
-                Depth     15
-                $MODES
-        EndSubSection
-        SubSection "Display"
-                Depth     16
-                $MODES
-        EndSubSection
-        SubSection "Display"
-                Depth     24
-                $MODES
-        EndSubSection
-        SubSection "Display"
-                Depth     32
-                $MODES
-        EndSubSection
-EndSection
-
-# Make sure you have the relevant Debian packages on your system
-# to be able to use DRI (libgl1-mesa-dri for example)
-Section "DRI"
-        Mode 0666
-EndSection
-
-$COMPOSITE
-
-## END OF FILE #################################################################
-EOX
-}
-# }}}
-
-# writeit {{{
-writeit() {
-    XCONFTMP="$(mktemp)"
-    xconfig > $XCONFTMP
-    # we do not want to have two CorePointers, deactivate one therefore
-    if grep -Eq '^[[:space:]]+InputDevice[ ]+"USB Mouse"[ ]+"CorePointer"' $XCONFTMP ; then
-       if grep -Eq '^[[:space:]]+InputDevice[ ]+"PS/2 Mouse"[ ]+"CorePointer"' $XCONFTMP ; then
-          sed -i 's|InputDevice.*PS/2.*CorePointer|# & # deactivated to avoid two CorePointers|' $XCONFTMP
-       fi
-    fi
-    [ -f $XCONFIG ] && sudo mv -f $XCONFIG $XCONFIG.old
-    sudo mv $XCONFTMP $XCONFIG
-    sudo chown root.root $XCONFIG
-    sudo chmod 644 $XCONFIG
-}
-# }}}
-
-# writeconfig {{{
-function writeconfig
-{
-  if [[ ! -f $XCONFIG ]] ; then
-    print -n "$bold_color$fg[blue]Creating $XCONFIG: $fg[red]"
-    writeit && print "$fg[green]done$reset_color"
-  else
-    if [ -z "$FORCE" -a -z "$FALLBACK" ] ; then
-       print "$bold_color$fg[blue]Notice: $XCONFIG exists already.
-Use the force-option (-force) to force creation.
-$fg[red]"
-    fi
-  fi
-  if [[ -n "$FORCE" ]] ; then
-    print "$bold_color$fg[blue]Force-switch or manual option(s) detected:"
-    print -n "\-> Moving eventual existing $XCONFIG to ${XCONFIG}.old: $fg[red]"
-    writeit && print "$fg[green]done$reset_color"
-  fi
-}
-# }}}
-
-# runit {{{
-function runit
-{
-  writeconfig
-  if [ "$(readlink /etc/X11/X)" = /bin/true ] ; then
-     print "$bold_color$fg[red]Fatal: /etc/X11/X is a symlink to /bin/true."
-     print "Fix it via running 'ln -sf /usr/bin/Xorg /etc/X11/X'"
-     exit 10
-  fi
-  if [ -z "$NOSTART" ] ; then
-    print "$reset_color"
-    if [ -x /etc/init.d/xorg-common ] ; then
-      sudo /etc/init.d/xorg-common start
-    else
-      if [ -x /etc/init.d/xfree86-common ] ; then
-        sudo /etc/init.d/xfree86-common start
-      fi
-    fi
-    print ""
-    if [ -z "$DISPLAY" ] ; then
-      print "$bold_color$fg[green]Now trying to run startx.$reset_color"
-      startx $XINITRC -- $XOPTS
-      return 1
-    else
-      print "$bold_color$fg[green]Now trying to run startx on display $DISPLAY.$reset_color"
-      startx $XINITRC -- :$DISPLAY $XOPTS
-      return 1
-    fi
-  else
-    print "$bold_color$fg[blue]Not running startx as requested via option.$reset_color"
-  fi
-}
-# }}}
-
-# failed {{{
-function failed
-{
-  print "$fg[red]"
-  if [ -z "$ROOT" ] ; then
-    if [[ $(tty) == /dev/pts/* ]] ; then
-      print "It seems you are running $PROGRAMNAME from inside GNU screen.
-Notice that this might fail if running as user grml!
-Please exit screen and try to run $PROGRAMNAME again."
-    fi
-  fi
-  print "Run the following commands for getting information on your hardware:
-  hwinfo --gfxcard
-  discover -v --data-path=xfree86/server/device/driver display
-  xdebconfigurator -c -d -i -x
-  get-edid | parse-edid
-
-Do you want to go the debian way of life? Run:
-  aptitude install xorg read-edid mdetect hwinfo xdebconfigurator
-  dpkg-reconfigure -phigh xserver-xorg
-
-Problems with the module used for X? Try to load another one or
-fall back to module vesa:
-  $PROGRAMNAME -module radeon ...
-  $PROGRAMNAME -module vesa  ...
-
-Do you want to deactivate a present synaptics touchpad? Run:
-  $PROGRAMNAME -nosynaptics ...
-
-Your monitor is very old and/or does not support DDC-probing?
-  $PROGRAMNAME -noddc ...
-
-Do you want to create a x configuration file but do not start X?
-  $PROGRAMNAME -nostart ...
-
-Monitor frequency too high or too low? Just specify hsync/vsync manually:
-  $PROGRAMNAME -hsync 30-65 ...
-  $PROGRAMNAME -hsync 30-65 -vsync 50-60 ...
-
-Want to adjust the resolution? Use the mode-switch:
-  $PROGRAMNAME -mode 1024x768 ...
-  $PROGRAMNAME -mode '1280x1024 1024x768' ...
-
-Problems? Use vesa with resolution 1024x768:
-  $PROGRAMNAME -module vesa -mode 1024x768 ...
-
-Still problems with X? Use the fallback option:
-  $PROGRAMNAME -fallback ...
-
-To adjust resolution while running X execute:
-  xrandr -s '1024x768'
-
-More information on grml-x can be found in the manual page: man grml-x
-
-Report bugs, send wishes and feedback to the grml team:
-http://grml.org/bugs/ - contact (at) grml.org
-"
-print -n "$reset_color"
-}
-# }}}
-
-# cleanup {{{
-cleanup()
-{
-  rm -f $HWINFO_TMP
-  rm -f $MONITORINFO
-  rm -f $MOUSEINFO
-  rm -f $XCONFTMP
-}
-cleanup
-# }}}
-
-# xinitrc {{{
-  if ! [ -x "$(which $WINDOWMANAGER)" ] ; then
-     print "$bg[black]$fg[red]${bold_color}Fatal: windowmanager $fg[blue]$WINDOWMANAGER$fg[red] not executable, startx will not work.${reset_color}">&2
-     bailout
-  fi
-  if [ -w "$XINITRC" ] ; then
-    sed -i "s|^[^#]*exec.*|  exec $WINDOWMANAGER|g" $XINITRC
-    runit || failed
-  else
-    echo -e "#!/bin/sh\n  exec $WINDOWMANAGER" >> $XINITRC
-    runit || failed
-  fi
-# }}}
-
-## END OF FILE #################################################################
-# vim:foldmethod=marker expandtab ai ft=zsh

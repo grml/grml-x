@@ -12,24 +12,19 @@ grml-x [ options ] $windowmanager_you_want_to_use
 Description
 -----------
 
-grml-x creates the configuration file for the X server (X.org) providing
-hardware detection and then starts up X server with the specified window
+grml-x creates the configuration file for the X server (X.org) letting you
+override some options and then starts up X server with the specified window
 manager.
 
 Implementation
 --------------
 
-grml-x uses hwinfo for collection hardware related information for further
-processing. It creates the X configuration file /etc/X11/xorg.conf for the X
-server (X.org) and needs root permissions therefore. If a X
-config file is present already, grml-x won't touch the file unless the '-force'
-option or another option which modifies content of the X config file is
-specified. The old config file gets backed up via adding the extension .old
-(available as /etc/X11/xorg.conf.old therefore).
+grml-x depends on the X server to configure itself. It will generate a very
+minimal xorg.conf, or, at your option, write some common options to it.
+If an xorg.conf file already exists, grml-x won't touch the file unless the
+'--force' option is specified.
 
-Afterwards the 'exec' command in $HOME/.xinitrc gets adjusted to start the provided
-window manager and then startx is executed. If $HOME/.xinitrc does not exist a
-simple default one will be created.
+If you specify a window manager, the x-window-manager alias will be updated.
 
 *******************************************************************************
 Important! Please do **not** run X or grml-x with root permissions!  When used in grml
@@ -37,7 +32,7 @@ live-cd mode running grml-x works as normal user as well (thanks to sudo). Just
 switch to an appropriate console where user grml is logged in (for example on
 tty5 via pressing Alt-F5).
 If you use grml-x on systems other than grml in live mode you can invoke
-it as user root but please use the '-nostart' option to avoid startup
+it as user root but please use the '--nostart' option to avoid startup
 X server. This allows you to generate a xorg.conf file on harddisk systems
 as well as on distributions other than grml/Debian.
 *******************************************************************************
@@ -54,116 +49,62 @@ Options
 XOPTS='...'::
         Provide options for startx, see 'man 1 startx'.
 
--composite::
-        Enable composite extension within /etc/X11/xorg.conf. Disabled by default.
-
--display <number>::
+--display <number>::
         Specify display for use with Xserver.
 
--fallback::
-        Copy /etc/X11/xorg.conf.example to /etc/X11/xorg.conf to get X
-        running when it won't start otherwise.
-
--force::
+--force::
         Force creation of xorg.conf file. This option is also assumed when another
         option which needs to be write values to the X config file is provided. The old
         X config file (/etc/X11/xorg.conf or /etx/X11/XFree86Config-4) is renamed
         via adding the extension .old.
 
--genmouse::
-        Generate generic entry for mouse using /dev/input/mice and auto protocol.
-
--help::
+--help::
         Display help.
 
--hsync <number>::
+--hsync <number>::
         Specify horizontal sync frequencies. Use a number like "30-65".
 
--mode <width>x<height>::
+--mode <width>x<height>::
         Set resolution for X server.
 
--module <name>::
+--module <name>::
         Use <name> as module for X server.
 
--noddc::
-        Do not use ddc probing but use static entries for resolution modes.
-
--nohsync::
-        Do not activate HorizSync-entry in xorg.conf file.
-
--nostart::
+--nostart::
         Do not start X server (useful when you want to generate new xorg.conf
         only. Do not forget to use -force option as well if xorg.conf exists
         already.)
-
--nosynaptics::
-        Do not activate a present Synaptics touchpad but use it only with 'normal' touchpad
-        functions.
-
--nosync::
-        Do not activate horizontal and vertical sync frequencies. This option is useful
-        on many modern computers using a LCD/TFT display. To avoid problems on very old
-        monitors this option is not the default.
-
--novref::
-        Do not activate VertRefresh-entry in xorg.conf file.
-
--ps2::
-        Add an entry for PS/2 mouse in the xorg.conf file.
-
--usb::
-        Add an entry for U  mouse in the xorg.conf file.
-
--vsync <number>::
+--vsync <number>::
         Specify vertical sync frequencies. Use a number like "50-60".
-
--xinerama::
-        Enable Xinerama support - disabled by default. Xinerama is an X server extension
-        that allows multiple physical screens to behave as a single screen. With
-        traditional multi-head in X11, windows cannot span or cross physical screens.
-        Please notice that some window managers are not Xinerama-aware, and so some
-        operations like window placement and resizing might not behave in an ideal way.
-        This is an issue that needs to be dealt with in the individual window managers
-        and not within grml-x or X server.
 
 [[X7]]
 Usage examples
 --------------
 
-grml-x -mode '1280x1024 1024x768' wmi::
-        Use resolutions 1280x1024 and 1024x768 and start windowmanager wmi.
+grml-x --mode '1280x1024 1024x768' wm-ng::
+        Use resolutions 1280x1024 and 1024x768 and start windowmanager wm-ng.
 
 grml-x -module vesa openbox::
         Use vesa-module and start windowmanager openbox.
 
-grml-x -hsync "30-65" fluxbox::
+grml-x --hsync "30-65" fluxbox::
         Use 30-65kHz for horizontal sync frequency and start windowmanager fluxbox.
 
-grml-x -display 8 ratpoison::
+grml-x --display 8 ratpoison::
         Use display 8 for Xserver and start windowmanager ratpoison.
 
-grml-x -xinerama -composite openbox::
-        Enable Xinerama setup and composite extension and start windowmanager openbox.
-
-grml-x -nostart -f fluxbox::
+grml-x --nostart -f fluxbox::
         Force writing of config file but do not start X server. Please do not forget to
         add a window manager as last option because grml-x changes the according
         exec-statement in $HOME/.xinitrc.
-
-XOPTS=\'-depth 16\' grml-x fluxbox::
-        Set color depth to 16 bit and start windowmanager fluxbox.
 
 Known problems and limitations
 ------------------------------
 
 Sometimes the X server does not find the correct resolution and/or frequency
-settings for the monitor. Please adjust configuration manually using the -hsync
-and the -vsync options then. Also check out the <<X7,usage examples section>> in
-this manpage and the help output of grml-x running 'grml-x -help'.
-
-The support for the Xinerama extension is brand new within grml-x and has not
-been tested on many boxes but only on systems using the intel driver of current
-X server. Please provide feedback!
+settings for the monitor. Please adjust configuration manually using the --hsync
+and the --vsync options then. Also check out the <<X7,usage examples section>> 
+in this manpage and the help output of grml-x running 'grml-x --help'.
 
 Bugs
 ----

@@ -3,7 +3,7 @@ Section: grml
 Priority: optional
 Maintainer: Michael Prokop <mika@grml.org>
 Build-Depends: debhelper (>= 5)
-Build-Depends-Indep: asciidoc, xsltproc, docbook-xsl
+Build-Depends-Indep: asciidoc, xsltproc, docbook-xs
 Standards-Version: 3.9.0
 Homepage: http://git.grml.org/?p=grml-x.git
 Vcs-git: git://git.grml.org/grml-x.git
@@ -11,7 +11,7 @@ Vcs-Browser: http://git.grml.org/?p=grml-x.git
 
 Package: grml-x
 Architecture: all
-Depends: ${shlibs:Depends}, ${misc:Depends}, xserver-xorg | xserver, hwinfo, grml-etc (>= 0.5-20), grml-etc-core (>= 0.2.46), zsh, pciutils, sudo, grml-shlib, bc, x11-xkb-utils, x11-xserver-utils, xauth, xinit
+Depends: ${shlibs:Depends}, ${misc:Depends}, xserver-xorg | xserver, hwinfo, grml-etc (>= 0.5-20), grml-etc-core (>= 0.2.46), zsh, pciutils, sudo, grml-shlib, bc, x11-xkb-utils, x11-xserver-utils, xauth, xinit, python
 Recommends: fluxbox | x-window-manager, x11-utils, xcursor-themes, xfonts-base, xserver-xorg-input-all, xserver-xorg-input-kbd, xserver-xorg-input-vmmouse, xserver-xorg-video-all, xterm | x-terminal-emulator,
 Suggests: xfonts-100dpi, xfonts-75dpi, fonts-ttf-west-european, xfonts-base-transcoded
 Conflicts: grml-scripts (<= 0.4-4)
