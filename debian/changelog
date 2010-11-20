@@ -1,3 +1,15 @@
+grml-x (0.6.0) unstable; urgency=low
+
+  [ Christian Hofstaedtler ]
+  * [c1f728d & more ] Rewrite grml-x. [Testing issue907]
+  * [24fe847] drop old Depends, downgrade grml-etc-core to Recommends
+
+  [ Michael Prokop ]
+  * [36be83b] Fix Build-Depends-Indep on docbook-xsl.
+  * [dd84658] Bump Standards-Version to 3.9.1.
+
+ -- Michael Prokop <mika@grml.org>  Sat, 20 Nov 2010 02:19:45 +0100
+
 grml-x (0.5.2) unstable; urgency=low
 
   [ Michael Stapelberg ]
