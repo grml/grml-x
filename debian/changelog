@@ -1,3 +1,11 @@
+grml-x (0.6.1) unstable; urgency=low
+
+  [ Christian Hofstaedtler ]
+  * [ec62a14] don't ship outdated example configs for VirtualBox/VMware
+  * [2246619] update xorg.conf.example
+
+ -- Michael Prokop <mika@grml.org>  Fri, 26 Nov 2010 22:53:03 +0100
+
 grml-x (0.6.0) unstable; urgency=low
 
   [ Christian Hofstaedtler ]
