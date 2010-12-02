@@ -144,7 +144,7 @@ def main():
     (options, args) = parser.parse_args()
     bootparams = build_bootparams()
 
-    if os.getuid() == 0:
+    if os.getuid() == 0 and options.start_server:
         print "W: running as root is unsupported and may not work."
         time.sleep(1)
 
