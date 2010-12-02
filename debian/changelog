@@ -1,3 +1,12 @@
+grml-x (0.6.2) unstable; urgency=low
+
+  * [82e874e] fix crash with --mode
+  * [be5b1ee] fix man page examples
+  * [72c7d74] only warn if running as root when starting X
+  * [7b5291c] documentation fixes
+
+ -- Christian Hofstaedtler <ch@grml.org>  Thu, 02 Dec 2010 23:05:06 +0100
+
 grml-x (0.6.1) unstable; urgency=low
 
   [ Christian Hofstaedtler ]
