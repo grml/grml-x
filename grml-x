@@ -24,6 +24,8 @@ class Section(object):
             v = self.data[k]
             if isinstance(v, list):
                 v = '" "'.join(v)
+            elif not isinstance(v, basestring): # int, others
+                v = str(v)
             elif '-' in v: # sync range
                 pass
             else:
