@@ -7,7 +7,7 @@ grml-x - create xorg.conf file and start X window system on grml-system
 
 Synopsis
 --------
-grml-x [ options ] $windowmanager_you_want_to_use
+grml-x [ options ] [ window-manager ]
 
 Description
 -----------
@@ -54,9 +54,7 @@ XOPTS='...'::
 
 --force::
         Force creation of xorg.conf file. This option is also assumed when another
-        option which needs to be write values to the X config file is provided. The old
-        X config file (/etc/X11/xorg.conf or /etx/X11/XFree86Config-4) is renamed
-        via adding the extension .old.
+        option which needs to be write values to the X config file is provided.
 
 --help::
         Display help.
@@ -71,9 +69,9 @@ XOPTS='...'::
         Use <name> as module for X server.
 
 --nostart::
-        Do not start X server (useful when you want to generate new xorg.conf
-        only. Do not forget to use -force option as well if xorg.conf exists
-        already.)
+        Do not start X server. Useful when you only want to generate
+        xorg.conf.
+
 --vsync <number>::
         Specify vertical sync frequencies. Use a number like "50-60".
 
