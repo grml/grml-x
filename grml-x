@@ -72,7 +72,7 @@ def build_bootparams():
     params = {}
     for p in ' '.join(lines).split(' '):
         if '=' in p:
-            (k,v) = p.split('=', 2)
+            (k,v) = p.split('=', 1)
             params[k] = v
         else:
             params[p] = True
