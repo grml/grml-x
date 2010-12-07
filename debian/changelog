@@ -1,3 +1,10 @@
+grml-x (0.6.3) unstable; urgency=low
+
+  [ Christian Hofstaedtler ]
+  * [25953d4] don't crash with multiple = per option in /proc/cmdline
+
+ -- Michael Prokop <mika@grml.org>  Tue, 07 Dec 2010 12:50:24 +0100
+
 grml-x (0.6.2) unstable; urgency=low
 
   * [82e874e] fix crash with --mode
