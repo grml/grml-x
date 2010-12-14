@@ -1,3 +1,10 @@
+grml-x (0.6.4) unstable; urgency=low
+
+  [ Christian Hofstaedtler ]
+  * [ca524b8] Explicitly use python2.6 [Closes: issue946]
+
+ -- Michael Prokop <mika@grml.org>  Tue, 14 Dec 2010 10:47:52 +0100
+
 grml-x (0.6.3) unstable; urgency=low
 
   [ Christian Hofstaedtler ]
