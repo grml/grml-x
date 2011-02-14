@@ -198,7 +198,7 @@ def main():
         f.close()
         f = open(xinitrc, 'w')
         for line in lines:
-            if line.startswith('exec '): line = wm_exec
+            if line.strip().startswith('exec '): line = wm_exec
             f.write(line)
         os.fchmod(f.fileno(), 0750)
         f.close()
