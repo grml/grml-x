@@ -1,3 +1,11 @@
+grml-x (0.6.5) unstable; urgency=low
+
+  [ Christian Hofstaedtler ]
+  * [096d5d2] ignore spaces when scanning xinitrc for the wm
+    [Closes: issue964]
+
+ -- Michael Prokop <mika@grml.org>  Tue, 15 Feb 2011 11:10:17 +0100
+
 grml-x (0.6.4) unstable; urgency=low
 
   [ Christian Hofstaedtler ]
