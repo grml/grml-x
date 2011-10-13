@@ -1,3 +1,12 @@
+grml-x (0.6.6) unstable; urgency=low
+
+  * [41e38b5] Add debian/control headers Origin, Bugs
+  * [b6d6bbc] Remove stale grml-shlib dependency
+  * [39de6de] Update to Standards-Version 3.9.2
+  * [78bb7ee] Update Python dependency to version 2.7
+
+ -- Christian Hofstaedtler <ch@grml.org>  Thu, 13 Oct 2011 22:08:34 +0200
+
 grml-x (0.6.5) unstable; urgency=low
 
   [ Christian Hofstaedtler ]
