@@ -13,7 +13,7 @@ Bugs: mailto:bugs@grml.org
 
 Package: grml-x
 Architecture: all
-Depends: ${shlibs:Depends}, ${misc:Depends}, xserver-xorg | xserver, sudo, x11-xkb-utils, x11-xserver-utils, xauth, xinit, python2.6
+Depends: ${shlibs:Depends}, ${misc:Depends}, xserver-xorg | xserver, sudo, x11-xkb-utils, x11-xserver-utils, xauth, xinit, python2.7
 Recommends: fluxbox | x-window-manager, x11-utils, xcursor-themes, xfonts-base, xserver-xorg-input-all, xserver-xorg-input-kbd, xserver-xorg-input-vmmouse, xserver-xorg-video-all, xterm | x-terminal-emulator, grml-etc-core
 Suggests: xfonts-100dpi, xfonts-75dpi, fonts-ttf-west-european, xfonts-base-transcoded
 Description: wrapper for startx for running X Window System
