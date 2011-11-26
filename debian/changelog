@@ -1,3 +1,10 @@
+grml-x (0.6.7) unstable; urgency=low
+
+  * [56f884e] + [aed317e] Depend on python instead of python2.7
+    and use python in shebang
+
+ -- Michael Prokop <mika@grml.org>  Sat, 26 Nov 2011 18:02:08 +0100
+
 grml-x (0.6.6) unstable; urgency=low
 
   * [41e38b5] Add debian/control headers Origin, Bugs
