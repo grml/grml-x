@@ -71,6 +71,7 @@ def build_bootparams():
     f.close()
     walk_bootparams_path('/cdrom/bootparams')
     walk_bootparams_path('/live/image/bootparams')
+    walk_bootparams_path('/lib/live/mount/medium/bootparams')
     params = {}
     for p in ' '.join(lines).split(' '):
         if '=' in p:
