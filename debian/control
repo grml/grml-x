@@ -5,9 +5,9 @@ Maintainer: Michael Prokop <mika@grml.org>
 Build-Depends: debhelper (>= 10~)
 Build-Depends-Indep: asciidoc, xsltproc, docbook-xsl
 Standards-Version: 4.3.0
-Homepage: http://git.grml.org/?p=grml-x.git
+Homepage: https://git.grml.org/?p=grml-x.git
 Vcs-git: git://git.grml.org/grml-x.git
-Vcs-Browser: http://git.grml.org/?p=grml-x.git
+Vcs-Browser: https://git.grml.org/?p=grml-x.git
 Origin: Grml
 Bugs: mailto:bugs@grml.org
 
