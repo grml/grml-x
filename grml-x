@@ -69,9 +69,8 @@ def build_bootparams():
     f = open('/proc/cmdline')
     lines.append(f.readline())
     f.close()
-    walk_bootparams_path('/cdrom/bootparams')
-    walk_bootparams_path('/live/image/bootparams')
     walk_bootparams_path('/lib/live/mount/medium/bootparams')
+    walk_bootparams_path('/run/live/medium/bootparams')
     params = {}
     for p in ' '.join(lines).split(' '):
         if '=' in p:
