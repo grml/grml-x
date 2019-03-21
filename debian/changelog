@@ -1,3 +1,14 @@
+grml-x (0.7.0) unstable; urgency=medium
+
+  * [d340f0c] Switch default mount point from /lib/live/mount/medium to
+    /run/live/medium
+  * [00df8d9] Bump Standards-Version to 4.3.0
+  * [eae46d9] Bump debian/compat to 10 and adjust Build-Depends on
+    debhelper accordingly
+  * [e6330b9] Use https version for Homepage and Vcs-Browser headers
+
+ -- Michael Prokop <mika@grml.org>  Thu, 21 Mar 2019 12:32:12 +0100
+
 grml-x (0.6.8) unstable; urgency=low
 
   [ Evgeni Golov ]
