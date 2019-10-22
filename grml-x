@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # vim: set et ts=4:
 
@@ -8,8 +8,6 @@
 # Bug-Reports:   see http://grml.org/bugs/
 # License:       This file is licensed under the GPL v2.
 ###############################################################################
-
-# Requires python 2.6 or, possibly, a newer version of python 2.X.
 
 import fileinput, os, subprocess, sys, tempfile, time, traceback
 from optparse import OptionParser
@@ -26,7 +24,7 @@ class Section(object):
             v = self.data[k]
             if isinstance(v, list):
                 v = '" "'.join(v)
-            elif not isinstance(v, basestring): # int, others
+            elif not isinstance(v, str): # int, others
                 v = str(v)
             elif '-' in v: # sync range
                 pass
@@ -65,7 +63,7 @@ def build_bootparams():
                     lines.extend(f.readlines())
                     f.close()
         except:
-            print 'W: Error while getting bootparams from %s' % p
+            print('W: Error while getting bootparams from %s' % p)
     f = open('/proc/cmdline')
     lines.append(f.readline())
     f.close()
@@ -147,12 +145,12 @@ def main():
     bootparams = build_bootparams()
 
     if os.getuid() == 0 and options.start_server:
-        print "W: running as root is unsupported and may not work."
+        print("W: running as root is unsupported and may not work.")
         time.sleep(1)
 
     if not check_old_xorg_conf(options.xorg_conf, options.overwrite):
-        print "E: Not overwriting existing %r without --force." % options.xorg_conf
-        print "I: If you previously ran grml-x, use startx /usr/bin/x-window-manager"
+        print("E: Not overwriting existing %r without --force." % options.xorg_conf)
+        print("I: If you previously ran grml-x, use startx /usr/bin/x-window-manager")
         return 1
 
     if 'xmode' in bootparams and not options.mode: options.mode = bootparams['xmode']
@@ -183,7 +181,7 @@ def main():
     if len(args) == 1: window_manager = args[0]
     window_manager_path = which(window_manager)
     if not window_manager_path:
-        print "E: Cannot find window manager %r, aborting." % window_manager
+        print("E: Cannot find window manager %r, aborting." % window_manager)
         return 2
 
     wm_exec = "exec %s\n" % window_manager_path
@@ -200,7 +198,7 @@ def main():
         for line in lines:
             if line.strip().startswith('exec '): line = wm_exec
             f.write(line)
-        os.fchmod(f.fileno(), 0750)
+        os.fchmod(f.fileno(), 0o750)
         f.close()
 
     # write new config
@@ -214,7 +212,7 @@ def main():
             if device: f.write(str(device))
             f.write(str(screen))
             f.flush()
-            os.fchmod(f.fileno(), 0644)
+            os.fchmod(f.fileno(), 0o644)
             run_program(['sudo', 'mv', '-f', f.name, options.xorg_conf])
         finally:
             f.close()
@@ -222,7 +220,7 @@ def main():
     if options.start_server:
         startx = ['startx', xinitrc, '--']
         if options.display: startx.append(':' + options.display)
-        print "Starting X: %r" % startx
+        print("Starting X: %r" % startx)
         run_program(startx)
 
     return 0
@@ -232,7 +230,7 @@ if __name__ == '__main__':
     try:
         rc = main()
     except Exception:
-        print "E: Exception: ",
+        print("E: Exception: ", end=' ')
         traceback.print_exc()
     sys.exit(1)
 
