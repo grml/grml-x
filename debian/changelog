@@ -1,3 +1,11 @@
+grml-x (0.7.1) unstable; urgency=medium
+
+  * [a5b4674] Port to py3k
+  * [b11539d] Bump Standards-Version to 4.4.1
+  * [5e5a361] wrap-and-sort debian/
+
+ -- Michael Prokop <mika@grml.org>  Tue, 22 Oct 2019 16:11:13 +0200
+
 grml-x (0.7.0) unstable; urgency=medium
 
   * [d340f0c] Switch default mount point from /lib/live/mount/medium to
