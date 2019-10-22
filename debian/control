@@ -2,8 +2,12 @@ Source: grml-x
 Section: grml
 Priority: optional
 Maintainer: Michael Prokop <mika@grml.org>
-Build-Depends: debhelper (>= 10~)
-Build-Depends-Indep: asciidoc, xsltproc, docbook-xsl
+Build-Depends:
+ debhelper (>= 10~),
+Build-Depends-Indep:
+ asciidoc,
+ docbook-xsl,
+ xsltproc,
 Standards-Version: 4.4.1
 Homepage: https://git.grml.org/?p=grml-x.git
 Vcs-git: git://git.grml.org/grml-x.git
@@ -13,9 +17,32 @@ Bugs: mailto:bugs@grml.org
 
 Package: grml-x
 Architecture: all
-Depends: ${shlibs:Depends}, ${misc:Depends}, xserver-xorg | xserver, sudo, x11-xkb-utils, x11-xserver-utils, xauth, xinit, python3
-Recommends: fluxbox | x-window-manager, x11-utils, xcursor-themes, xfonts-base, xserver-xorg-input-all, xserver-xorg-input-kbd, xserver-xorg-input-vmmouse, xserver-xorg-video-all, xterm | x-terminal-emulator, grml-etc-core
-Suggests: xfonts-100dpi, xfonts-75dpi, fonts-ttf-west-european, xfonts-base-transcoded
+Depends:
+ python3,
+ sudo,
+ x11-xkb-utils,
+ x11-xserver-utils,
+ xauth,
+ xinit,
+ xserver-xorg | xserver,
+ ${misc:Depends},
+ ${shlibs:Depends},
+Recommends:
+ fluxbox | x-window-manager,
+ grml-etc-core,
+ x11-utils,
+ xcursor-themes,
+ xfonts-base,
+ xserver-xorg-input-all,
+ xserver-xorg-input-kbd,
+ xserver-xorg-input-vmmouse,
+ xserver-xorg-video-all,
+ xterm | x-terminal-emulator,
+Suggests:
+ fonts-ttf-west-european,
+ xfonts-100dpi,
+ xfonts-75dpi,
+ xfonts-base-transcoded,
 Description: wrapper for startx for running X Window System
  grml-x generates a configuration for X server, supporting
  several options and using a hardware recognition system.
