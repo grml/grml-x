@@ -1,4 +1,4 @@
-all: doc
+all: doc codecheck
 
 doc: doc_man doc_html
 
@@ -28,3 +28,8 @@ online: doc
 
 clean:
 	rm -rf grml-x.html grml-x.1 grml-x.xml html-stamp man-stamp
+
+codecheck:
+	flake8 grml-x
+	isort --check-only grml-x
+	black --check grml-x
