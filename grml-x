@@ -204,7 +204,7 @@ def main():
     # write new config
     if monitor or device or len(screen.data) > 0 or screen.subsect != '':
         try:
-            f = tempfile.NamedTemporaryFile(delete=False)
+            f = tempfile.NamedTemporaryFile(mode='w+', delete=False)
             f.write(XORG_CONF_HEADER + "\n")
             f.write("# DO NOT MODIFY, YOUR CHANGES WILL BE LOST - OR REMOVE ALL HEADER LINES\n")
             f.write("# See man xorg.conf or /etc/X11/xorg.conf.example for more\n")
