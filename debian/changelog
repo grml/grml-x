@@ -1,3 +1,13 @@
+grml-x (0.7.2) unstable; urgency=medium
+
+  * [db26b12] Fix tempfile.NamedTemporaryFile usage under Python 3
+  * [2289606] Do not fail if /etc/X11/xorg.conf already exists
+  * [af8390f] Coding style: execute black + isort and integrate flake8,
+    isort + black in build toolchain
+  * [ac9f682] Fix flake8 issues
+
+ -- Michael Prokop <mika@grml.org>  Tue, 07 Jul 2020 16:22:40 +0200
+
 grml-x (0.7.1) unstable; urgency=medium
 
   * [a5b4674] Port to py3k
