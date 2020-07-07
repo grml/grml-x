@@ -9,7 +9,6 @@
 # License:       This file is licensed under the GPL v2.
 ###############################################################################
 
-import fileinput
 import os
 import subprocess
 import sys
@@ -75,7 +74,7 @@ def build_bootparams():
                     f = open(os.path.join(root, name))
                     lines.extend(f.readlines())
                     f.close()
-        except:
+        except Exception:
             print("W: Error while getting bootparams from %s" % p)
 
     f = open("/proc/cmdline")
@@ -144,7 +143,7 @@ def check_old_xorg_conf(filename, overwrite):
         f = open(filename, "r")
         lines = f.readlines()
         f.close()
-        return not XORG_CONF_HEADER in lines
+        return XORG_CONF_HEADER not in lines
     except IOError:
         return False
 
