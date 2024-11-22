@@ -3,7 +3,7 @@ Section: grml
 Priority: optional
 Maintainer: Michael Prokop <mika@grml.org>
 Build-Depends:
- debhelper (>= 10~),
+ debhelper-compat (= 13),
 Build-Depends-Indep:
  asciidoc,
  docbook-xsl,
