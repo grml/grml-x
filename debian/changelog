@@ -1,3 +1,16 @@
+grml-x (0.8.0) unstable; urgency=medium
+
+  [ Chris Hofstaedtler ]
+  * [a840380] debian: update Vcs-Git and Vcs-Browser
+
+  [ Michael Prokop ]
+  * [e33818b] d/control: Bump Standards-Version to 4.7.0
+  * [821abd9] d/control: bump compat version to 13 via debhelper-compat +
+    drop debian/compat
+  * [6d19bc6] Ship debian/gbp.conf for gbp usage
+
+ -- Michael Prokop <mika@grml.org>  Fri, 22 Nov 2024 17:53:24 +0100
+
 grml-x (0.7.2) unstable; urgency=medium
 
   * [db26b12] Fix tempfile.NamedTemporaryFile usage under Python 3
