@@ -1,64 +1,8 @@
 #!/usr/bin/make -f
-# -*- makefile -*-
-# Sample debian/rules that uses debhelper.
-# This file was originally written by Joey Hess and Craig Small.
-# As a special exception, when this file is copied by dh-make into a
-# dh-make output file, you may use that output file without restriction.
-# This special exception was added by Craig Small in version 0.37 of dh-make.
 
-# Uncomment this to turn on verbose mode.
-#export DH_VERBOSE=1
+%:
+	dh $@
 
-build:
-	make clean
-	make doc
+override_dh_auto_build:
+	make clean doc
 
-build-stamp:
-	dh_testdir
-	# Add here commands to compile the package.
-	touch build-stamp
-
-clean:
-	dh_testdir
-	dh_testroot
-	rm -f build-stamp html-stamp man-stamp
-
-	# Add here commands to clean up after the build process.
-	make clean
-	dh_clean
-
-install: build
-	dh_testdir
-	dh_testroot
-	dh_prep
-	dh_installdirs etc/X11 usr/bin usr/share/grml
-
-	# Add here commands to install the package into debian/grml-x.
-	install -m 755 grml-x     debian/grml-x/usr/bin/grml-x
-	cp -a etc/X11/*           debian/grml-x/etc/X11/
-	cp -a usr_share_grml/zsh/ debian/grml-x/usr/share/grml/
-
-# Build architecture-dependent files here.
-binary-arch: build install
-# We have nothing to do by default.
-
-# Build architecture-independent files here.
-binary-indep: build install
-	dh_testdir
-	dh_testroot
-	dh_installchangelogs
-	dh_installdocs
-	dh_installexamples
-	dh_installman grml-x.1
-	dh_link
-	dh_strip
-	dh_compress
-	dh_fixperms
-	dh_installdeb
-	dh_shlibdeps
-	dh_gencontrol
-	dh_md5sums
-	dh_builddeb
-
-binary: binary-indep binary-arch
-.PHONY: build clean binary-indep binary-arch binary install
