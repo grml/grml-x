@@ -1,3 +1,2 @@
 grml-x usr/bin/
-etc/X11 etc/
 zsh-completion/_grml-x usr/share/zsh/vendor-completions/
