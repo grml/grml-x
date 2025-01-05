@@ -1,3 +1,12 @@
+grml-x (0.8.1) unstable; urgency=medium
+
+  * [a4a183c] Use dh sequencer to build
+  * [ccc7ae2] Install zsh completion into grml-neutral directory
+  * [9851de3] Install xorg.conf.example into /usr/share/doc/grml-x/examples/
+  * [bbefbe0] Update debian/copyright
+
+ -- Chris Hofstaedtler <ch@grml.org>  Mon, 06 Jan 2025 00:17:26 +0100
+
 grml-x (0.8.0) unstable; urgency=medium
 
   [ Chris Hofstaedtler ]
