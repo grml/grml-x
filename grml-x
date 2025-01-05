@@ -289,7 +289,7 @@ def main():
             f.write(
                 "# DO NOT MODIFY, YOUR CHANGES WILL BE LOST - OR REMOVE ALL HEADER LINES\n"
             )
-            f.write("# See man xorg.conf or /etc/X11/xorg.conf.example for more\n")
+            f.write("# See man xorg.conf or /usr/share/doc/grml-x/examples/xorg.conf for more\n")
             if monitor:
                 f.write(str(monitor))
             if device:

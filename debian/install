@@ -1,0 +1,2 @@
+grml-x usr/bin/
+zsh-completion/_grml-x usr/share/zsh/vendor-completions/
