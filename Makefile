@@ -23,9 +23,6 @@ man-stamp: grml-x.txt
 	rm grml-x.1.tmp
 	touch man-stamp
 
-online: doc
-	scp grml-x.html grml:/var/www/grml/grml-x/index.html
-
 clean:
 	rm -rf grml-x.html grml-x.1 grml-x.xml html-stamp man-stamp
 
