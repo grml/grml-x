@@ -1,3 +1,9 @@
+grml-x (0.8.2) unstable; urgency=medium
+
+  * [4c49377] Makefile: remove scp leftovers
+
+ -- Chris Hofstaedtler <ch@grml.org>  Tue, 04 Mar 2025 23:29:49 +0100
+
 grml-x (0.8.1) unstable; urgency=medium
 
   * [a4a183c] Use dh sequencer to build
