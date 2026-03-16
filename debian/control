@@ -15,6 +15,7 @@ Vcs-Browser: https://github.com/grml/grml-x
 Origin: Grml
 Bugs: mailto:bugs@grml.org
 Rules-Requires-Root: no
+X-Style: black
 
 Package: grml-x
 Architecture: all
