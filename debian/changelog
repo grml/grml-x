@@ -1,3 +1,9 @@
+grml-x (0.8.3) unstable; urgency=medium
+
+  * [103cba6] d/control: Set X-Style: black
+
+ -- Chris Hofstaedtler <ch@grml.org>  Tue, 28 Apr 2026 16:38:19 +0200
+
 grml-x (0.8.2) unstable; urgency=medium
 
   * [4c49377] Makefile: remove scp leftovers
