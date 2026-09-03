@@ -83,6 +83,7 @@ def build_bootparams():
     walk_bootparams_path("/lib/live/mount/medium/bootparams")
     walk_bootparams_path("/run/live/medium/bootparams")
     params = {}
+    lines = [line.strip() for line in lines]
     for p in " ".join(lines).split(" "):
         if "=" in p:
             (k, v) = p.split("=", 1)
