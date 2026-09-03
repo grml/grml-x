@@ -1,3 +1,9 @@
+grml-x (0.8.4) unstable; urgency=medium
+
+  * [74aea0a] Fix accidental newline inclusion in xorg.conf
+
+ -- Chris Hofstaedtler <ch@grml.org>  Thu, 03 Sep 2026 11:23:31 +0200
+
 grml-x (0.8.3) unstable; urgency=medium
 
   * [103cba6] d/control: Set X-Style: black
